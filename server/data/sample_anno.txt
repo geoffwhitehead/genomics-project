@@ -1,0 +1,10 @@
+GL0376222_unmapped_[Complete]_[mRNA]_locus=C220157743_1:2100:2801:+	NA	NA
+GL0376223_unmapped_[Complete]_[mRNA]_locus=C220157743_1:2794:3045:+	NA	NA
+GL0376224_unmapped_[Complete]_[mRNA]_locus=C220157743_1:3038:3655:+	COG0756	K01520
+GL0376225_unmapped_[Complete]_[mRNA]_locus=C220157743_1:3652:4830:+	COG1793	K01971
+GL0376226_unmapped_[Complete]_[mRNA]_locus=C220157743_1:4908:5453:+	NOG16922	NA
+GL0376227_unmapped_[Complete]_[mRNA]_locus=C220157743_1:5446:5634:+	NA	NA
+GL0376228_unmapped_[Complete]_[mRNA]_locus=C220157743_1:5631:5876:+	COG0526	K03671
+GL0376229_unmapped_[Complete]_[mRNA]_locus=C220157743_1:5873:6148:+	NA	NA
+GL0376230_unmapped_[Complete]_[mRNA]_locus=C220157743_1:6129:7490:+	NA	NA
+GL0376231_unmapped_[Complete]_[mRNA]_locus=C220157743_1:7490:7792:+	NA	NA

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html ng-app="mainApp" ng-controller="DataController">
+
+    <head>
+        <title>Project</title>
+        <link href="/css/styles.css" rel="stylesheet" type="text/css">
+        <script src="/lib/cytoscape/cytoscape.min.js" type="text/javascript"></script>
+        <script src="/js/graphs/basic.js" type="text/javascript"></script>
+
+        <script src="/lib/angular/angular.min.js" type="text/javascript"></script>
+        <script src="/lib/angular-route/angular-route.min.js" type="text/javascript"></script>
+        <script src="/js/app.js" type="text/javascript"></script>
+        <script src="/js/factory.js" type="text/javascript"></script>
+        <script src="/js/controllers.js" type="text/javascript"></script>
+        <!--<script src="/lib/cytoscape-cola/cytoscape-cola.js" type="text/javascript"></script>-->
+
+        <link href="/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+    </head>
+
+    <body>
+        <div class="container">
+            <br><br><br>
+{{nodes}}
+<br><br><br>
+            <h1>Network Graph</h1>
+            <hr/>{{read}}
+            <div ng-view></div>
+            <div id="cy">
+
+            </div>
+
+            <div class="row col-md-12">
+                <button ng-click="fetchNodes()">Fetch Graph</button>
+            </div>
+
+            <div class="row col-md-12" id="cy"></div>
+
+            <!-- Live reload script -->
+
+            <script src="http://localhost:35729/livereload.js" type="text/javascript"></script>
+        </div>
+    </body>
+
+</html>

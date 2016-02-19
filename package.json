@@ -1,0 +1,29 @@
+{
+    "name": "network_project",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts":
+    {
+        "test": "mocha test",
+        "seed_people": "node ./scripts/seed_people",
+        "seed_genome": "node ./scripts/seed_genome",
+    },
+    "author": "geoff whitehead",
+    "license": "ISC",
+    "dependencies":
+    {
+        "body-parser": "^1.14.2",
+        "mongojs": "^2.3.0",
+        "mongoose": "node_modules/mongoose"
+    },
+    "devDependencies":
+    {
+        "gulp": "^3.9.0",
+        "gulp-jshint": "^2.0.0",
+        "gulp-livereload": "^3.8.1",
+        "gulp-nodemon": "^2.0.6",
+        "gulp-watch": "^4.3.5",
+        "jshint": "^2.9.1"
+    }
+}

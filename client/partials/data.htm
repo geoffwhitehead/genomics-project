@@ -1,0 +1,98 @@
+
+
+    <div class="row col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div>
+                    Filter:
+                    <input type="text" class="form-control input-lg" placeholder="Select a study..." ng-model="studyFilter.name">
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>id</th>
+                            <th>name</th>
+                            <th>info</th>
+                            <th>size</th>
+                        </tr>
+                        <tr class="clickable-row" ng-repeat="study in studies | filter:studyFilter | orderBy:sortBy:reverse">
+                            <td>
+                                {{study.id}}
+                            </td>
+                            <td>
+                                {{study.name}}
+                            </td>
+                            <td>
+                                {{study.info}}
+                            </td>
+                            <td>
+                                {{study.size}}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div>
+                    Filter:
+                    <input type="text" class="form-control input-lg" placeholder="Select a gene..." ng-model="geneFilter.name">
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>id</th>
+                            <th>name</th>
+                            <th>info</th>
+                            <th>family</th>
+                        </tr>
+                        <tr class="clickable-row" ng-repeat="gene in genes | filter:geneFilter | orderBy:sortBy:reverse">
+                            <td>
+                                {{gene.id}}
+                            </td>
+                            <td>
+                                {{gene.name}}
+                            </td>
+                            <td>
+                                {{gene.info}}
+                            </td>
+                            <td>
+                                {{gene.family}}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div>
+                    Filter:
+                    <input type="text" class="form-control input-lg" placeholder="Select a relationship..." ng-model="relFilter.name">
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>name</th>
+                            <th>description</th>
+                        </tr>
+                        <tr class="clickable-row" ng-repeat="r in relationships | filter:relFilter | orderBy:sortBy:reverse">
+                            <td>
+                                {{r.name}}
+                            </td>
+                            <td>
+                                {{r.description}}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
