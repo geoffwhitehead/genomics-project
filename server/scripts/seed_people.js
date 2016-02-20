@@ -1,6 +1,5 @@
 console.log('loading people');
 
-
 var fs = require('fs'),
     path = require('path'),
     Person = require('../models/person'),
@@ -12,10 +11,6 @@ mongoose.connect(db, function(err)
 {
     if (err) console.log(err);
 });
-
-
-
-
 
 fs.readFile(path.join(__dirname, '../data/people.txt'), function(err, data)
 {

@@ -4,7 +4,7 @@ mainApp = angular.module('mainApp', ['ngRoute'])
     $routeProvider
         .when('/',
         {
-            templateUrl: '/partials/data.htm',
+            templateUrl: '/partials/data.html',
             controller: 'DataController'
         })
 

@@ -39,8 +39,14 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
         $scope.read = data.data;
     });
 
-
-
+    $scope.fetchNodes = function()
+    {
+        dataFactory.getNodes().then(function(data)
+        {
+            $scope.nodes = data.data;
+            drawGraph();
+        });
+    }
     /*
       // get a gene
       $scope.get = function(i) {
