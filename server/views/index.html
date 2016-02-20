@@ -18,10 +18,27 @@
 
     </head>
 
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">
+                    <img src="" alt="">
+                    <p>Graph</p>
+                </a>
+            </div>
+        </div>
+    </nav>
+
     <body>
+
         <div class="container">
-            <h1>Network Graph</h1>
-            <div ng-view></div>
+            <ul class="nav nav-tabs nav-justified">
+                <li role="presentation"><a href="#about">About</a></li>
+                <li role="presentation"><a href="#reference">Reference Search</a></li>
+                <li role="presentation"><a href="#sequential">Sequence Search</a></li>
+            </ul>
+            <br>
+                <div ng-view></div>
 
             <div class="row col-md-12" id="cy"></div>
 

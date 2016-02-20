@@ -1,0 +1,42 @@
+<html ng-app="mainApp" ng-controller="DataController">
+    <div class="row col-md-12">
+        <div class="panel panel-default">
+
+            <div class="panel-body">
+                <div>
+                    <p>use cog references to search for a gene in the dataset</p>
+                    <div class="row col-md-6">
+                        <input type="text" class="form-control input-lg" placeholder="Select a gene..." ng-model="geneFilter.name">
+                    </div>
+
+                    <div class="row col-md-6">
+                        <button type="button" class="btn btn-default">Load Graph</button>
+                    </div>
+                    <div class="row col-md-12">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tr>
+                                    <th>cog_ref</th>
+                                    <th>type</th>
+                                    <th>metadata</th>
+                                </tr>
+                                <tr class="clickable-row" ng-repeat="gene in genes | filter:geneFilter | orderBy:sortBy:reverse">
+                                    <td>
+                                        {{gene.cog_ref}}
+                                    </td>
+                                    <td>
+                                        {{gene.type}}
+                                    </td>
+                                    <td>
+                                        {{gene.metadata}}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</html>
