@@ -1,5 +1,10 @@
 //var cy = $("#cy").cytoscape("get");
 var cy = "";
+var cytoscape = require('cytoscape');
+var cycola = require('cytoscape-cola');
+var cola = require('cola');
+
+cycola( cytoscape, cola ); // register extension
 function drawGraph()
 {
 
@@ -33,16 +38,11 @@ function drawGraph()
                 }
             }
         ],
-
-        layout:
-        {
-            name: 'grid',
-            rows: 1
-        }
-
     });
 }
 
+cy.layout({ name: 'spread',
+						minDist: 40 })
 
 function addNodes(nodes){
     cy.load( nodes.data );  // use this to re draw graph with these nodes

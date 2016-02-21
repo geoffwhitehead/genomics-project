@@ -15,7 +15,8 @@
     {
         "body-parser": "^1.14.2",
         "mongojs": "^2.3.0",
-        "mongoose": "node_modules/mongoose"
+        "mongoose": "node_modules/mongoose",
+        "underscore": "1.8.3"
     },
     "devDependencies":
     {
@@ -24,6 +25,7 @@
         "gulp-livereload": "^3.8.1",
         "gulp-nodemon": "^2.0.6",
         "gulp-watch": "^4.3.5",
-        "jshint": "^2.9.1"
+        "jshint": "^2.9.1",
+        "line-by-line": "0.1.4",
     }
 }

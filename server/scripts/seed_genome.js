@@ -4,28 +4,42 @@ var fs = require('fs'),
     path = require('path'),
     Genome = require('../models/genome'),
     mongoose = require('mongoose'),
-    db = 'mongodb://localhost/GenomeProject',
-    readLine = require('readline'),
-    stream = require('stream'),
-    outstream = new stream(),
-    instream = fs.createReadStream(path.join(__dirname, '../../../sample_anno-2000000.txt')),
-    rl = readLine.createInterface(instream, outstream);
+    LineByLineReader = require('line-by-line'),
+    db = 'mongodb://localhost/GenomeProject';
+//readLine = require('readline'),
+//stream = require('stream'),
+//outstream = new stream(),
+//instream = fs.createReadStream(),
 
+
+
+var file = path.join(__dirname, '../../../sample_anno-2000000.txt');
+var lr = new LineByLineReader(file);
 mongoose.connect(db, function(err)
 {
     if (err) console.log('1: ' + err);
 });
 
+// delete all genomes from database
 Genome.remove(
 {}, function(err, data)
 {
     console.log(err);
 });
-var i = 0;
 
-rl.on('line', function(line) // read in a line
+var i = 0;
+var j = 0;
+
+lr.on('error', function(err)
+{
+    console.log('ERROR: ' + err)
+});
+
+lr.on('line', function(line) // read in a line
     {
+        lr.pause();
         i++;
+        j++;
         //console.log('line from file: ', line);
         line = line.toString().replace('\t', '_'); // replace the tabs to make delimeter consistent in teh string
         line = line.toString().replace('\t', '_');
@@ -44,21 +58,24 @@ rl.on('line', function(line) // read in a line
         genome.species = [];
         genome.metadata = [];
 
-
         genome.save(function(err, data) // SAVE
             {
                 if (err)
                 {
-                    return console.log('4 saving: ' + err);
+                    lt.emit('error', err, genome)
                 }
                 else
                 {
-                    console.log(i + ': saved');
+                    if (j >= 1000){
+                        console.log(i + ': saved');
+                        j = 0;
+                    }
                 }
+                lr.resume();
             });
     });
 
-rl.on('close', function()
+lr.on('close', function()
 {
     console.log('\nRefreshed index;');
     process.exit();
