@@ -22,7 +22,7 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
             dataFactory.getGeneSearch($scope.geneSearch.toUpperCase()).then(function(data)
             {
                 $scope.genes = data.data;
-                console.log("factory data" + data)
+                console.log("factory data" + data);
             }).catch(errorHandler);
 
         } else {
@@ -37,7 +37,7 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
             $scope.nodes = data.data;
             addNodes(data);
         });
-    }
+    };
 
     // get the reference graph based on query input
     $scope.fetchGraphRef2 = function(){
@@ -46,7 +46,7 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
             $scope.nodes = data.data;
             addNodes(data);
         });
-    }
+    };
 
 
     //

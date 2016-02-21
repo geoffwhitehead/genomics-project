@@ -8,6 +8,7 @@
     var Genome = require('../models/genome.js');
     var Person = require('../models/person.js');
     var bodyParser = require('body-parser');
+    var _ = require('underscore');
     var db = 'mongodb://localhost/GenomeProject';
 
     mongoose.connect(db, function(err)
@@ -101,13 +102,13 @@
                         source: cog_query,
                         target: results[i].code
                     }
-                })
+                });
             }
             console.log("RESULT: " + data);
             if (err) res.send(err);
             else res.send(data);
 
-        })
+        });
 
     });
 
@@ -118,19 +119,19 @@
         var data = [];
 
         data.push(
-            { // node a
-                group: "nodes",
-                data:
-                {
-                    id: 'a'
-                },
-                position:
-                {
-                    x: 100,
-                    y: 200
-                },
-            }),
-            res.send(data);
+        { // node a
+            group: "nodes",
+            data:
+            {
+                id: 'a'
+            },
+            position:
+            {
+                x: 100,
+                y: 200
+            },
+        });
+        res.send(data);
     });
 
 
@@ -140,26 +141,93 @@
         var cog_query = req.params._cog;
         console.log('getting graph 2 with  with cog: ' + cog_query);
 
-        var people = [];
+        var people = {};
         var temp = '';
         Person.find(
         {}, function(err, results)
         {
+            if (err) res.send(err);
             for (var i = 0; i < results.length; i++)
             {
-                temp = results[i].id;
-                people.push(
+                // added this line to filter out all the results that are UNMAPPED, V1, or O2.
+                if ((results[i].id != 'unmapped') || (results[i].id != 'V1') || (results[i].id != 'O2'))
                 {
-                    name: temp,
-                    count: 0
-                })
+                    people[results[i].id] = 0;
+                }
             }
-            console.log("RESULT: " + people);
-            if (err) res.send(err);
-            else res.send(people);
-        })
-        console.log(people)
+            //console.log("RESULT: " + people);
 
+            Genome.find(
+            {
+                "cog_ref": new RegExp(cog_query)
+            }, function(err, results)
+            {
+
+                if (err) res.send(err);
+                //console.log('SIZE: '+results.length );
+                //console.log('QUERY'+cog_query);
+                for (var i = 0; i < results.length; i++)
+                {
+                    console.log("count" + people[results[i].person_id]);
+                    people[results[i].person_id]++;
+                }
+
+                data.push(
+                { // insert a new node
+                    group: "nodes",
+                    data:
+                    {
+                        id: cog_query,
+                    },
+                    style:
+                    {
+                        width: 50,
+                        height:50,
+                        'background-color': '#666',
+                    }
+                });
+
+                for (var p in people)
+                {
+                    console.log(p + " : " + people[p]);
+                    data.push(
+                    { // insert a new node
+                        group: "nodes",
+                        data:
+                        {
+                            id: p,
+                        },
+                        style:
+                        {
+                            width: people[p],
+                            height: people[p]
+                        }
+                    });
+
+                }
+                console.log(data);
+                //res.send(people);
+                res.send(data);
+            });
+            //console.log('PEOPLE SIZE: '+_.size(people));
+            //console.log('PEOPLE LOG: '+people);
+
+
+            // create the nodes to push back
+
+            // insert an edge for the new node
+            // data.push(
+            // {
+            //     data:
+            //     {
+            //         id: cog_query + "-" + results[i].code,
+            //         source: cog_query,
+            //         target: results[i].code
+            //     }
+            // })
+            //console.log("RESULT: " + data);
+
+        });
 
 
 
@@ -232,20 +300,19 @@
         var data = [];
 
         data.push(
-            { // node a
-                group: "nodes",
-                data:
-                {
-                    id: 'a'
-                },
-                position:
-                {
-                    x: 100,
-                    y: 200
-                },
-            }),
-
-            res.send(data);
+        { // node a
+            group: "nodes",
+            data:
+            {
+                id: 'a'
+            },
+            position:
+            {
+                x: 100,
+                y: 200
+            }
+        });
+        res.send(data);
     });
 
 

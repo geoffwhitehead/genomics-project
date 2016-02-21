@@ -32,7 +32,7 @@ var j = 0;
 
 lr.on('error', function(err)
 {
-    console.log('ERROR: ' + err)
+    console.log('ERROR: ' + err);
 });
 
 lr.on('line', function(line) // read in a line
@@ -62,7 +62,7 @@ lr.on('line', function(line) // read in a line
             {
                 if (err)
                 {
-                    lt.emit('error', err, genome)
+                    lt.emit('error', err, genome);
                 }
                 else
                 {

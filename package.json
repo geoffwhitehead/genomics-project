@@ -7,7 +7,7 @@
     {
         "test": "mocha test",
         "seed_people": "node ./scripts/seed_people",
-        "seed_genome": "node ./scripts/seed_genome",
+        "seed_genome": "node ./scripts/seed_genome"
     },
     "author": "geoff whitehead",
     "license": "ISC",
