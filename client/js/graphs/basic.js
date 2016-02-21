@@ -3,7 +3,7 @@ var cy = "";
 function drawGraph()
 {
 
-
+    // use this for testing some nodes on load
     nodes = angular.element(document.querySelector('[ng-controller="DataController"]')).scope().nodes;
 
     cy = cytoscape(
@@ -41,8 +41,6 @@ function drawGraph()
         }
 
     });
-
-    cy.add(nodes);
 }
 
 
