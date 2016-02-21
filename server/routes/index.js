@@ -6,6 +6,7 @@
     var router = express.Router();
     var mongoose = require('mongoose');
     var Genome = require('../models/genome.js');
+    var Person = require('../models/person.js');
     var bodyParser = require('body-parser');
     var db = 'mongodb://localhost/GenomeProject';
 
@@ -50,7 +51,7 @@
     });
 
     //GET GRAPH (REFERENCE)
-    router.get('/api/data/graph/ref/:_cog', function(req, res)
+    router.get('/api/data/graph/ref/1/:_cog', function(req, res)
     {
         var data = [];
         var cog_query = req.params._cog;
@@ -62,12 +63,28 @@
         }, function(err, results)
         {
 
+            data.push(
+            { // insert a new node
+                group: "nodes",
+                data:
+                {
+                    id: cog_query,
+                },
+                position:
+                {
+                    x: 100,
+                    y: 100
+                },
+            });
+            console.log(cog_query);
+            for (var i = 0; i < results.length; i++)
+            {
                 data.push(
                 { // insert a new node
                     group: "nodes",
                     data:
                     {
-                        id: cog_query,
+                        id: results[i].code,
                     },
                     position:
                     {
@@ -75,34 +92,18 @@
                         y: 100
                     },
                 });
-                console.log(cog_query);
-                for (var i = 0; i < results.length; i++)
+                // insert an edge for the new node
+                data.push(
                 {
-                    data.push(
-                    { // insert a new node
-                        group: "nodes",
-                        data:
-                        {
-                            id: results[i].code,
-                        },
-                        position:
-                        {
-                            x: 100,
-                            y: 100
-                        },
-                    });
-                    // insert an edge for the new node
-                    data.push(
+                    data:
                     {
-                        data:
-                        {
-                            id: cog_query + "-" + results[i].code,
-                            source: cog_query,
-                            target: results[i].code
-                        }
-                    })
-                }
-                console.log("RESULT: " + data);
+                        id: cog_query + "-" + results[i].code,
+                        source: cog_query,
+                        target: results[i].code
+                    }
+                })
+            }
+            console.log("RESULT: " + data);
             if (err) res.send(err);
             else res.send(data);
 
@@ -129,9 +130,126 @@
                     y: 200
                 },
             }),
+            res.send(data);
+    });
+
+
+    router.get('/api/data/graph/ref/2/:_cog', function(req, res)
+    {
+        var data = [];
+        var cog_query = req.params._cog;
+        console.log('getting graph 2 with  with cog: ' + cog_query);
+
+        var people = [];
+        var temp = '';
+        Person.find(
+        {}, function(err, results)
+        {
+            for (var i = 0; i < results.length; i++)
+            {
+                temp = results[i].id;
+                people.push(
+                {
+                    name: temp,
+                    count: 0
+                })
+            }
+            console.log("RESULT: " + people);
+            if (err) res.send(err);
+            else res.send(people);
+        })
+        console.log(people)
+
+
+
+
+        // Genome.find(
+        // {
+        //     "cog_ref": new RegExp(req.params._cog)
+        // }, function(err, results)
+        // {
+        //
+        //     data.push(
+        //     { // insert a new node
+        //         group: "nodes",
+        //         data:
+        //         {
+        //             id: cog_query,
+        //         },
+        //         position:
+        //         {
+        //             x: 100,
+        //             y: 100
+        //         },
+        //     });
+        //     console.log(cog_query);
+        //
+        //
+        //
+        //
+        //
+        //
+        //
+        //
+        //     for (var i = 0; i < results.length; i++)
+        //     {
+        //         data.push(
+        //         { // insert a new node
+        //             group: "nodes",
+        //             data:
+        //             {
+        //                 id: results[i].code,
+        //             },
+        //             position:
+        //             {
+        //                 x: 100,
+        //                 y: 100
+        //             },
+        //         });
+        //         // insert an edge for the new node
+        //         data.push(
+        //         {
+        //             data:
+        //             {
+        //                 id: cog_query + "-" + results[i].code,
+        //                 source: cog_query,
+        //                 target: results[i].code
+        //             }
+        //         })
+        //     }
+        //     console.log("RESULT: " + data);
+        //     if (err) res.send(err);
+        //     else res.send(data);
+        //
+        // })
+
+    });
+
+    // gets some test nodes for graph setup
+    router.get('/api/data/nodes', function(req, res)
+    {
+        console.log('sending some data');
+        var data = [];
+
+        data.push(
+            { // node a
+                group: "nodes",
+                data:
+                {
+                    id: 'a'
+                },
+                position:
+                {
+                    x: 100,
+                    y: 200
+                },
+            }),
 
             res.send(data);
     });
+
+
+
     // router.get('/api/data/test', function(req, res)
     // {
     //     console.log('sending some test');

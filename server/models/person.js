@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var PersonSchema = new Schema({
-    name        : { type: String, required:true },
+    id          : { type: String, required:true },
     country     : { type: String, required:true },
     gender      : { type: String, required:true },
     age         : { type: Number, required:true },

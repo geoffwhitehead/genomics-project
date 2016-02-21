@@ -29,7 +29,7 @@ fs.readFile(path.join(__dirname, '../data/people.txt'), function(err, data)
             var fields = row.toString().split(",");
             var person = new Person();
 
-            person.name = fields[0];
+            person.id = fields[0];
             person.country = fields[1];
             person.gender = fields[2];
             person.age = fields[3];

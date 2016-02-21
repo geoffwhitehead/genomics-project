@@ -13,10 +13,13 @@ mainApp.factory('dataFactory', function($http)
     };
     _service.getGraphRef = function(req)
     {
-        return $http.get(urlBase + "/graph/ref/"+req);
+        return $http.get(urlBase + "/graph/ref/1/"+req);
     };
 
-
+    _service.getGraphRef2 = function(req)
+    {
+        return $http.get(urlBase + "/graph/ref/2/"+req);
+    };
 
 
     // _service.getStudies = function()

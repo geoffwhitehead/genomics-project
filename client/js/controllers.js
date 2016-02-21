@@ -38,6 +38,17 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
             addNodes(data);
         });
     }
+
+    // get the reference graph based on query input
+    $scope.fetchGraphRef2 = function(){
+    dataFactory.getGraphRef2($scope.geneSearch.toUpperCase()).then(function(data)
+        {
+            $scope.nodes = data.data;
+            addNodes(data);
+        });
+    }
+
+
     //
     // // get all studies on Load
     // dataFactory.getStudies().then(function(data)
