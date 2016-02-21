@@ -1,10 +1,12 @@
 //var cy = $("#cy").cytoscape("get");
+var cy = "";
 function drawGraph()
 {
 
+
     nodes = angular.element(document.querySelector('[ng-controller="DataController"]')).scope().nodes;
 
-    var cy = cytoscape(
+    cy = cytoscape(
     {
 
         container: document.getElementById('cy'), // container to render in
@@ -41,4 +43,10 @@ function drawGraph()
     });
 
     cy.add(nodes);
+}
+
+
+function addNodes(nodes){
+    cy.load( nodes.data );  // use this to re draw graph with these nodes
+    //cy.add(nodes);        // use this to add nodes to current graph
 }

@@ -9,7 +9,6 @@
     var bodyParser = require('body-parser');
     var db = 'mongodb://localhost/GenomeProject';
 
-
     mongoose.connect(db, function(err)
     {
         if (err) console.log(err);
@@ -56,6 +55,123 @@
         }];
         res.status(200).json(data);
     });
+
+    //GENE SEARCH
+    //TODO will need to change this to access database of cogs rather than the actual gene set
+    router.get('/api/data/genes/:_searchString', function(req, res)
+    {
+        console.log('sending some data');
+
+        Genome.find(
+        {
+            "cog_ref": new RegExp(req.params._searchString)
+        }, function(err, data)
+        {
+            console.log('searched: ' + req.params._searchString + "-- returned: " + data);
+            if (err) res.send(err);
+            else res.send(data);
+        }).limit(5);
+    });
+
+    //GET GRAPH (REFERENCE)
+    router.get('/api/data/graph/ref/:_cog', function(req, res)
+    {
+        var data = [];
+        var cog_query = req.params._cog;
+        console.log('getting ref graph with cog: ' + cog_query);
+
+        Genome.find(
+        {
+            "cog_ref": new RegExp(req.params._cog)
+        }, function(err, results)
+        {
+
+                data.push(
+                { // insert a new node
+                    group: "nodes",
+                    data:
+                    {
+                        id: cog_query,
+                    },
+                    position:
+                    {
+                        x: 100,
+                        y: 100
+                    },
+                });
+                console.log(cog_query);
+                for (var i = 0; i < results.length; i++)
+                {
+                    data.push(
+                    { // insert a new node
+                        group: "nodes",
+                        data:
+                        {
+                            id: results[i].code,
+                        },
+                        position:
+                        {
+                            x: 100,
+                            y: 100
+                        },
+                    });
+                    // insert an edge for the new node
+                    data.push(
+                    {
+                        data:
+                        {
+                            id: cog_query + "-" + results[i].code,
+                            source: cog_query,
+                            target: results[i].code
+                        }
+                    })
+                }
+                console.log("RESULT: " + data);
+            if (err) res.send(err);
+            else res.send(data);
+
+        })
+
+
+
+        // .forEach(function(gene){
+        //     data.push(
+        //         {   // insert a new node
+        //             group: "nodes",
+        //             data:{
+        //                 id: _pluck(gene, 'code')
+        //             }
+        //         }
+        //     )
+        // });
+        // console.log("RESULT: "+data);
+    });
+
+    // var data = [
+    //
+    //     { // node a
+    //         group: "nodes",
+    //         data:
+    //         {
+    //             id: 'a'
+    //         },
+    //         position:
+    //         {
+    //             x: 100,
+    //             y: 200
+    //         },
+    //     }
+    //
+
+
+    // { //edge ab
+    //     data:
+    //     {
+    //         id: 'ab',
+    //         source: 'a',
+    //         target: 'b'
+    //     }
+    // },
 
     router.get('/api/data/studies/:_studyId/genes', function(req, res)
     {
@@ -156,8 +272,9 @@
     router.get('/api/data/nodes', function(req, res)
     {
         console.log('sending some data');
-        var data = [
+        var data = [];
 
+        data.push(
             { // node a
                 group: "nodes",
                 data:
@@ -169,106 +286,106 @@
                     x: 100,
                     y: 200
                 },
-            },
-            {
-                //node b
-                group: "nodes",
-                data:
-                {
-                    id: 'b'
-                },
-                position:
-                {
-                    x: 200,
-                    y: 100
-                },
-            },
-            {
-                //node c
-                group: "nodes",
-                data:
-                {
-                    id: 'c'
-                },
-                position:
-                {
-                    x: 100,
-                    y: 100
-                },
-            },
-            {
-                //node d
-                group: "nodes",
-                data:
-                {
-                    id: 'd'
-                },
-                position:
-                {
-                    x: 20,
-                    y: 400
-                },
-            },
-            {
-                //node e
-                group: "nodes",
-                data:
-                {
-                    id: 'e'
-                },
-                position:
-                {
-                    x: 500,
-                    y: 400
-                },
-            },
-            {
-                //node f
-                group: "nodes",
-                data:
-                {
-                    id: 'f'
-                },
-                position:
-                {
-                    x: 800,
-                    y: 50
-                },
-            },
-            { //edge ab
-                data:
-                {
-                    id: 'ab',
-                    source: 'a',
-                    target: 'b'
-                }
-            },
-            { //edge ab
-                data:
-                {
-                    id: 'cd',
-                    source: 'c',
-                    target: 'd'
-                }
-            },
-            { //edge ab
-                data:
-                {
-                    id: 'ef',
-                    source: 'e',
-                    target: 'f'
-                }
-            },
-            { //edge ab
-                data:
-                {
-                    id: 'fa',
-                    source: 'f',
-                    target: 'a'
-                }
-            },
-        ];
-        res.send(data);
+            }),
+            // {
+            //     //node b
+            //     group: "nodes",
+            //     data:
+            //     {
+            //         id: 'b'
+            //     },
+            //     // position:
+            //     // {
+            //     //     x: 200,
+            //     //     y: 100
+            //     // },
+            // },
+            // {
+            //     //node c
+            //     group: "nodes",
+            //     data:
+            //     {
+            //         id: 'c'
+            //     },
+            //     position:
+            //     {
+            //         x: 100,
+            //         y: 100
+            //     },
+            // },
+            // {
+            //     //node d
+            //     group: "nodes",
+            //     data:
+            //     {
+            //         id: 'd'
+            //     },
+            //     position:
+            //     {
+            //         x: 20,
+            //         y: 400
+            //     },
+            // },
+            // {
+            //     //node e
+            //     group: "nodes",
+            //     data:
+            //     {
+            //         id: 'e'
+            //     },
+            //     position:
+            //     {
+            //         x: 500,
+            //         y: 400
+            //     },
+            // },
+            // {
+            //     //node f
+            //     group: "nodes",
+            //     data:
+            //     {
+            //         id: 'f'
+            //     },
+            //     position:
+            //     {
+            //         x: 800,
+            //         y: 50
+            //     },
+            // },
+            // { //edge ab
+            //     data:
+            //     {
+            //         id: 'ab',
+            //         source: 'a',
+            //         target: 'b'
+            //     }
+            // },
+            // { //edge ab
+            //     data:
+            //     {
+            //         id: 'cd',
+            //         source: 'c',
+            //         target: 'd'
+            //     }
+            // },
+            // { //edge ab
+            //     data:
+            //     {
+            //         id: 'ef',
+            //         source: 'e',
+            //         target: 'f'
+            //     }
+            // },
+            // { //edge ab
+            //     data:
+            //     {
+            //         id: 'fa',
+            //         source: 'f',
+            //         target: 'a'
+            //     }
+            // },
+            // ];
+            res.send(data);
     });
 
     router.get('/api/data/read', function(req, res)

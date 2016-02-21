@@ -1,18 +1,20 @@
-<html ng-app="mainApp" ng-controller="DataController">
+
     <div class="row col-md-12">
         <div class="panel panel-default">
-
+<div>{{geneSearch}}</div>
             <div class="panel-body">
                 <div>
                     <p>use cog references to search for a gene in the dataset</p>
                     <div class="row col-md-6">
-                        <input type="text" class="form-control input-lg" placeholder="Select a gene..." ng-model="geneFilter.name">
+                        <input type="text" class="form-control input-lg" placeholder="Select a gene..." ng-model="geneSearch" ng-change="inputChanged()" ng-trim="true">
+
                     </div>
 
                     <div class="row col-md-6">
-                        <button type="button" class="btn btn-default">Load Graph</button>
+                        <button ng-click="fetchGraphRef()">Fetch Graph</button>
                     </div>
                     <div class="row col-md-12">
+
                         <div class="table-responsive">
                             <table class="table">
                                 <tr>
@@ -20,7 +22,7 @@
                                     <th>type</th>
                                     <th>metadata</th>
                                 </tr>
-                                <tr class="clickable-row" ng-repeat="gene in genes | filter:geneFilter | orderBy:sortBy:reverse">
+                                <tr class="clickable-row" ng-repeat="gene in genes | orderBy:sortBy:reverse">
                                     <td>
                                         {{gene.cog_ref}}
                                     </td>
@@ -34,9 +36,8 @@
                             </table>
                         </div>
                     </div>
+                    <div class="row col-md-12" id="cy"></div>
                 </div>
             </div>
         </div>
     </div>
-
-</html>

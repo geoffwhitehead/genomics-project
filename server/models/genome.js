@@ -11,6 +11,7 @@ var GenomeSchema = new Schema({
     alignment      : { type: String, required: true },
     kegg_ref       : { type: String, required: true },
     cog_ref        : { type: String, required: true },
+    species        : [{ type: String }],
     metadata       : [{ type: String }]
 });
 

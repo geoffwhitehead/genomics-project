@@ -7,7 +7,7 @@ var fs = require('fs'),
     db = 'mongodb://localhost/GenomeProject',
     readLine = require('readline'),
     stream = require('stream'),
-    outstream = new stream,
+    outstream = new stream(),
     instream = fs.createReadStream(path.join(__dirname, '../data/sample_anno.txt')),
     rl = readLine.createInterface(instream, outstream);
 
@@ -20,7 +20,7 @@ Genome.remove(
 {}, function(err, data)
 {
     console.log(err);
-})
+});
 
 rl.on('line', function(line) // read in a line
     {
@@ -37,8 +37,8 @@ rl.on('line', function(line) // read in a line
         genome.type = fields[3];
         genome.build = fields[4];
         genome.alignment = fields[5];
-        genome.kegg_ref = fields[6];
-        genome.cog_ref = fields[7];
+        genome.cog_ref = fields[6];
+        genome.kegg_ref = fields[7];
         genome.species = [];
         genome.metadata = [];
 
@@ -47,11 +47,12 @@ rl.on('line', function(line) // read in a line
             {
                 if (err)
                 {
-                    return console.log('4 saving: ' + err)
+                    return console.log('4 saving: ' + err);
                 }
                 else
                 {
-                    console.log('saved')
-                };
+                    console.log('saved');
+                }
             });
+            db.close;
     });

@@ -7,7 +7,7 @@ var fs = require('fs'),
     db = 'mongodb://localhost/GenomeProject',
     readLine = require('readline'),
     stream = require('stream'),
-    outstream = new stream,
+    outstream = new stream(),
     instream = fs.createReadStream(path.join(__dirname, '../data/sample_tax.txt')),
     rl = readLine.createInterface(instream, outstream);
 
@@ -20,7 +20,7 @@ mongoose.connect(db, function(err)
 
 rl.on('line', function(err, line)
         {
-            if (err) {return console.log('5: ' + err)}; // log any errors
+            if (err) {return console.log('5: ' + err);} // log any errors
 
             line.trim(); // remove any white space
             line = line.toString().replace('\t', '_'); //replace tab chars with underscores to match rest of string
@@ -39,5 +39,6 @@ rl.on('line', function(err, line)
                         metadata: meta
                     }
                 }
-            )
+            );
+            db.close;
         });

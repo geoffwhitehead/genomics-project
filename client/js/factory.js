@@ -8,9 +8,9 @@ mainApp.factory('dataFactory', function($http)
         return $http.get(urlBase + "/studies");
     };
 
-    _service.getGenes = function()
+    _service.getGeneSearch = function(req)
     {
-        return $http.get(urlBase + "/studies/1/genes");
+        return $http.get(urlBase + "/genes/" + req);
     };
 
     _service.getRelationships = function()
@@ -22,6 +22,11 @@ mainApp.factory('dataFactory', function($http)
     {
         return $http.get(urlBase + "/nodes");
     };
+    _service.getGraphRef = function(req)
+    {
+        return $http.get(urlBase + "/graph/ref/"+req);
+    };
+    
 
     _service.getRead = function()
     {
