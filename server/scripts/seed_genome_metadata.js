@@ -40,5 +40,6 @@ rl.on('line', function(err, line)
                     }
                 }
             );
-            db.close;
+
         });
+db.close;

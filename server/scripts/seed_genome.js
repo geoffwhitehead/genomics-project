@@ -8,7 +8,7 @@ var fs = require('fs'),
     readLine = require('readline'),
     stream = require('stream'),
     outstream = new stream(),
-    instream = fs.createReadStream(path.join(__dirname, '../data/sample_anno.txt')),
+    instream = fs.createReadStream(path.join(__dirname, '../../../sample_anno-2000000.txt')),
     rl = readLine.createInterface(instream, outstream);
 
 mongoose.connect(db, function(err)
@@ -21,9 +21,11 @@ Genome.remove(
 {
     console.log(err);
 });
+var i = 0;
 
 rl.on('line', function(line) // read in a line
     {
+        i++;
         //console.log('line from file: ', line);
         line = line.toString().replace('\t', '_'); // replace the tabs to make delimeter consistent in teh string
         line = line.toString().replace('\t', '_');
@@ -51,8 +53,13 @@ rl.on('line', function(line) // read in a line
                 }
                 else
                 {
-                    console.log('saved');
+                    console.log(i + ': saved');
                 }
             });
-            db.close;
     });
+
+rl.on('close', function()
+{
+    console.log('\nRefreshed index;');
+    process.exit();
+});
