@@ -21,6 +21,10 @@ mainApp.factory('dataFactory', function($http)
         return $http.get(urlBase + "/graph/ref/2/"+req);
     };
 
+    _service.getGraphRef3 = function(req)
+    {
+        return $http.get(urlBase + "/graph/ref/3/"+req);
+    };
 
     // _service.getStudies = function()
     // {

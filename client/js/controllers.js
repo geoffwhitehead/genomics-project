@@ -48,6 +48,14 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
         });
     };
 
+    // get the reference graph based on query input
+    $scope.fetchGraphRef3 = function(){
+    dataFactory.getGraphRef3($scope.geneSearch.toUpperCase()).then(function(data)
+        {
+            $scope.nodes = data.data;
+            addNodes(data);
+        });
+    };
 
     //
     // // get all studies on Load
