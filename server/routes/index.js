@@ -112,6 +112,69 @@
 
     });
 
+    router.get('/api/data/graph/seq/:_sequence', function(req, res)
+    {
+        console.log("HELLO");
+        var data = "helllpooo data";
+
+        var p = path.join(__dirname, '../results/result.txt')
+        var stream = fs.createWriteStream(p);
+        stream.once('open', function(fd){
+            stream.write(data);
+        });
+        // fs.writeFile(p, "Hey there!", function(err) {
+        //     if(err) {
+        //         return console.log(err);
+        //     }
+        //     console.log("PATHHHHHHHHHH ---- " + p);
+        //     console.log("The file was saved!");
+        // });
+
+
+
+
+        //res.send(data);
+
+        // const child_process = require('child_process');
+        //
+        // for(var i=0; i<3; i++) {
+        //    var workerProcess = child_process.spawn('node', ['support.js', i]);
+        // var d = "";
+        //
+        //
+        //
+        //
+        //    workerProcess.stdout.on('data', function (data) {
+        //      console.log('stdout: ' + data);
+        //   });
+        //
+        //   workerProcess.stderr.on('data', function (data) {
+        //      console.log('stderr: ' + data);
+        //      d += data;
+        //   });
+        //
+        //   workerProcess.on('close', function (code) {
+        //      console.log('child process exited with code ' + code);
+        //      if (!code) return res.send(d);
+        //   });
+        // }
+        // fs.access(path, fs.F_OK, function(err)
+        // {
+        //     if (!err)
+        //     {
+        //         // Do something
+        //     }
+        //     else
+        //     {
+        //         // It isn't accessible
+        //     }
+        // });
+
+    });
+
+
+
+
     // gets some test nodes for graph setup
     router.get('/api/data/nodes', function(req, res)
     {
@@ -169,49 +232,18 @@
             {
 
                 if (err) res.send(err);
-                //console.log('SIZE: '+results.length );
-                //console.log('QUERY'+cog_query);
                 for (var i = 0; i < results.length; i++)
                 {
-                    console.log("count" + people[results[i].person_id]);
                     people[results[i].person_id]++;
                 }
 
-                data.push(
-                { // insert a new node
-                    group: "nodes",
-                    data:
-                    {
-                        id: cog_query,
-                    },
-                    style:
-                    {
-                        width: 50,
-                        height: 50,
-                        'background-color': '#666',
-                    }
-                });
+
+                data.push(createNode(cog_query, 50, 50, '#2d2d2d'));
 
                 for (var p in people)
                 {
-                    console.log(p + " : " + people[p]);
-                    data.push(
-                    { // insert a new node
-                        group: "nodes",
-                        data:
-                        {
-                            id: p,
-                        },
-                        style:
-                        {
-                            width: people[p],
-                            height: people[p]
-                        }
-                    });
-
+                    data.push(createNode(p, people[p], people[p], '#2d2d2d'));
                 }
-                console.log(data);
-                //res.send(people);
                 res.send(data);
             });
         });
@@ -227,54 +259,52 @@
 
         var meta = {
             age:
-            [{
-                "0-10": 0,
-                "11-20": 0,
-                "21-30": 0,
-                "31-40": 0,
-                "41-50": 0,
-                "51-60": 0,
-                ">60": 0,
-            }],
+            {
+                '0-10': 0,
+                '11-20': 0,
+                '21-30': 0,
+                '31-40': 0,
+                '41-50': 0,
+                '51-60': 0,
+                '>60': 0,
+            },
             gender:
-            [{
-                "male": 0,
-                "female": 0,
-            }],
+            {
+                male: 0,
+                female: 0,
+            },
             bmi:
-            [{
-                "underweight": 0,
-                "normal": 0,
-                "overweight": 0,
-                "obese": 0
-            }],
+            {
+                underweight: 0,
+                normal: 0,
+                overweight: 0,
+                obese: 0
+            },
             ibd:
-            [{
-                "yes": 0,
-                "no": 0,
-            }],
+            {
+                yes: 0,
+                no: 0,
+            },
             nationality:
-            [{
-                "denmark": 0,
-                "spain": 0,
-            }]
+            {
+                denmark: 0,
+                spain: 0,
+            }
         };
 
 
         var temp = '';
-        var people = {};
+        var people = [];
 
         Person.find(
         {}, function(err, results)
         {
             if (err) res.send(err);
-            console.log("LENGTH: " + results.length);
+
             for (var i = 0; i < results.length; i++)
             {
                 people[results[i].id] = results[i];
             }
-            console.log("RESULT: " + people.length);
-            console.log("RESULT: " + people);
 
             Genome.find(
             {
@@ -297,23 +327,23 @@
                         {
                             meta.age['0-10']++
                         }
-                        else if (person.age <= 20)
+                        else if (person['age'] <= 20)
                         {
                             meta.age['11-20']++
                         }
-                        else if (person.age <= 30)
+                        else if (person['age'] <= 30)
                         {
                             meta.age['21-30']++
                         }
-                        else if (person.age <= 40)
+                        else if (person['age'] <= 40)
                         {
                             meta.age['31-40']++
                         }
-                        else if (person.age <= 50)
+                        else if (person['age'] <= 50)
                         {
                             meta.age['41-50']++
                         }
-                        else if (person.age <= 60)
+                        else if (person['age'] <= 60)
                         {
                             meta.age['51-60']++
                         }
@@ -370,77 +400,26 @@
                     }
                 }
 
-                // create all the nodes based on the data
-
                 // BASE NODE
-                data.push(
-                { // insert a new node
-                    group: "nodes",
-                    data:
-                    {
-                        id: cog_query,
-                    },
-                    style:
-                    {
-                        width: 20,
-                        height: 20,
-                        'background-color': '#666',
-                    }
-                });
+                data.push(createNode(cog_query, 20, 20, '#ff0000'));
 
                 // CATEGORY NODES
                 for (var cat in meta)
                 {
-                    data.push(
-                    {
-                        group: "properties",
-                        data:
-                        {
-                            id: cat,
-                        },
-                        style:
-                        {
-                            width: 5,
-                            height: 5,
-                            'background-color': '#666',
-                        }
-                    },
-                    {
-                        data:
-                        {
-                            id: cog_query + "-" + cat,
-                            source: cog_query,
-                            target: cat
-                        }
-                    });
-                    console.log("CATEGORY: "+cat);
+                    data.push(createNode(cat, 5, 5, '#00ff00'));
+                    data.push(createEdge(cog_query + "" + cat, cog_query, cat));
                     //PROPERTY NODES
-                    for (var property in cat)
+                    for (var property in meta[cat])
                     {
-                        if (cat.hasOwnProperty(property)) {
-                            console.log("PROPERTY: "+ property);
-                            data.push(
-                            { // insert a new node
-                                group: "nodes",
-                                data:
-                                {
-                                    id: property,
-                                },
-                                style:
-                                {
-                                    width: cat[property],
-                                    height: cat[property]
-                                }
-
-                            });
-                        }
-
+                        data.push(createNode(property, meta[cat][property], meta[cat][property], '#00ff00'));
+                        data.push(createEdge(cat + "-" + property, cat, property));
                     }
-                }
-                console.log(data);
+                };
                 res.send(data);
-            });
+            }); //end find
+
         });
+
     });
 
 
@@ -466,7 +445,35 @@
         res.send(data);
     });
 
+    function createNode(node_id, width, height, colour)
+    {
+        return {
+            group: "nodes",
+            data:
+            {
+                id: node_id,
+            },
+            style:
+            {
+                width: width,
+                height: height,
+                'background-color': colour
+            }
 
+        }
+    }
+
+    function createEdge(edge_id, source_node, target_node)
+    {
+        return { // insert a new edge
+            data:
+            {
+                id: edge_id,
+                source: source_node,
+                target: target_node,
+            }
+        }
+    }
 
     // router.get('/api/data/test', function(req, res)
     // {

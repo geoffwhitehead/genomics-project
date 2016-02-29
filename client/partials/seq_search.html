@@ -3,7 +3,48 @@
         <div class="panel panel-default">
             <div class="panel-body">
                 <div>
-                    seq
+
+
+                    <div>Test Scope: {{sequenceSearch}}</div>
+
+                        <p>DNA etc ect</p>
+
+
+
+                    <div class="row col-md-6">
+                        <textarea class="form-control input-lg" placeholder="Input a DNA sequence to search for..." ng-model="sequenceSearch"  ng-trim="true"></textarea>
+                    </div>
+
+                    <div class="row col-md-6">
+                        <button ng-click="sequenceQuery()">Search</button>
+                    </div>
+
+                    <div class="row col-md-12">
+                        <br>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tr>
+                                    <th>cog_ref</th>
+                                    <th>type</th>
+                                    <th>metadata</th>
+                                </tr>
+                                <tr class="clickable-row" >
+                                    <td>
+                                        asd
+                                    </td>
+                                    <td>
+                                        asd
+                                    </td>
+                                    <td>
+                                        asd
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row col-md-12" id="cy"></div>
+
                 </div>
             </div>
         </div>

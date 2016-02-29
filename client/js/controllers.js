@@ -57,6 +57,13 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
         });
     };
 
+    $scope.sequenceQuery = function(){
+        dataFactory.getGraphSeq($scope.sequenceSearch.toUpperCase()).then(function(data){
+                $scope.nodes = data.data;
+            //addNodes(data);
+        })
+    }
+
     //
     // // get all studies on Load
     // dataFactory.getStudies().then(function(data)

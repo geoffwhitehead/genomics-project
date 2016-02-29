@@ -26,6 +26,11 @@ mainApp.factory('dataFactory', function($http)
         return $http.get(urlBase + "/graph/ref/3/"+req);
     };
 
+    _service.getGraphSeq = function(req)
+    {
+        console.log("in factory");
+        return $http.get(urlBase + "/graph/seq/"+req);
+    };
     // _service.getStudies = function()
     // {
     //     return $http.get(urlBase + "/studies");
