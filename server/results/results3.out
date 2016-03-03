@@ -1,0 +1,43 @@
+BLASTN 2.3.0+
+
+
+Reference: Zheng Zhang, Scott Schwartz, Lukas Wagner, and Webb
+Miller (2000), "A greedy algorithm for aligning DNA sequences", J
+Comput Biol 2000; 7(1-2):203-14.
+
+
+
+Database: /Volumes/Portable/Metadata/output2.txt
+           5,000 sequences; 3,429,888 total letters
+
+
+
+Query= AB000263 |acc=AB000263|descr=Homo sapiens mRNA for prepro
+cortistatin like peptide, complete cds.|len=368
+
+Length=368
+
+
+***** No hits found *****
+
+
+
+Lambda      K        H
+    1.33    0.621     1.12 
+
+Gapped
+Lambda      K        H
+    1.28    0.460    0.850 
+
+Effective search space used: 1153736136
+
+
+  Database: /Volumes/Portable/Metadata/output2.txt
+    Posted date:  Feb 29, 2016  3:27 PM
+  Number of letters in database: 3,429,888
+  Number of sequences in database:  5,000
+
+
+
+Matrix: blastn matrix 1 -2
+Gap Penalties: Existence: 0, Extension: 2.5

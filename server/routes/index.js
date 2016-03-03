@@ -114,49 +114,56 @@
 
     router.get('/api/data/graph/seq/:_sequence', function(req, res)
     {
-        console.log("HELLO");
-        var data = "helllpooo data";
-
-        var p = path.join(__dirname, '../results/result.txt')
-        var stream = fs.createWriteStream(p);
-        stream.once('open', function(fd){
-            stream.write(data);
-        });
-        // fs.writeFile(p, "Hey there!", function(err) {
-        //     if(err) {
-        //         return console.log(err);
-        //     }
-        //     console.log("PATHHHHHHHHHH ---- " + p);
-        //     console.log("The file was saved!");
+        // create a new file with the query string
+        // var p = path.join(__dirname, '../results/result.txt')
+        // var stream = fs.createWriteStream(p);
+        // stream.once('open', function(fd){
+        //     stream.write(">search_query\n"+req.params._sequence);
         // });
 
 
+        // create a child process to handle performing a search
 
+        (function() {
+            var childProcess = require("child_process");
+            var oldSpawn = childProcess.spawn;
+            function mySpawn() {
+                console.log('spawn called');
+                console.log(arguments);
+                var result = oldSpawn.apply(this, arguments);
+                return result;
+            }
+            childProcess.spawn = mySpawn;
+        })();
 
-        //res.send(data);
+var spawn = require('child_process').spawn;
+        var _ = require('underscore'); // for some utility goodness
+var workerProcess = spawn('sh', [ './server/results/run.sh' ], {
+ // cwd: process.env.HOME + '/myProject',
+  //env:_.extend(process.env, { PATH: process.env.PATH + ':/usr/local/bin' })
+});
 
-        // const child_process = require('child_process');
         //
         // for(var i=0; i<3; i++) {
-        //    var workerProcess = child_process.spawn('node', ['support.js', i]);
-        // var d = "";
+        //    var workerProcess = child_process.spawn('node', ['./server/results/run.sh', i]);
+     var d = "";
         //
         //
         //
         //
-        //    workerProcess.stdout.on('data', function (data) {
-        //      console.log('stdout: ' + data);
-        //   });
-        //
-        //   workerProcess.stderr.on('data', function (data) {
-        //      console.log('stderr: ' + data);
-        //      d += data;
-        //   });
-        //
-        //   workerProcess.on('close', function (code) {
-        //      console.log('child process exited with code ' + code);
-        //      if (!code) return res.send(d);
-        //   });
+           workerProcess.stdout.on('data', function (data) {
+             console.log('stdout: ' + data);
+          });
+
+          workerProcess.stderr.on('data', function (data) {
+             console.log('stderr: ' + data);
+             d += data;
+          });
+
+          workerProcess.on('close', function (code) {
+             console.log('child process exited with code ' + code);
+             if (!code) return res.send(d);
+          });
         // }
         // fs.access(path, fs.F_OK, function(err)
         // {
