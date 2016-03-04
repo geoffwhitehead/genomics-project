@@ -11,7 +11,13 @@ var GenomeSchema = new Schema({
     location                : { type: String, required: true },
     cog_ref                 : { type: String, required: true },
     kegg_ref                : { type: String, required: true },
-    similar_scaffolds       : [String],
+    similar_scaffolds       :
+    [{
+        scaffold: String,
+        location: String,
+        person_id: String,
+        blast_id: String
+    }],
     taxonomy                : [String],
 });
 module.exports = mongoose.model('Genome', GenomeSchema);
