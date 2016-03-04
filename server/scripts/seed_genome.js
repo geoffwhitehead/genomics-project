@@ -6,14 +6,10 @@ var fs = require('fs'),
     mongoose = require('mongoose'),
     LineByLineReader = require('line-by-line'),
     db = 'mongodb://localhost/GenomeProject';
-//readLine = require('readline'),
-//stream = require('stream'),
-//outstream = new stream(),
-//instream = fs.createReadStream(),
 
 
-
-var file = path.join(__dirname, '../../../sample_anno-2000000.txt');
+var file = '/Volumes/Portable/Metadata/0-9/geneset_annotated_0-9.fa';
+//var file = path.join(__dirname, '/Volumes/Portable/Metadata/');
 var lr = new LineByLineReader(file);
 mongoose.connect(db, function(err)
 {
@@ -40,39 +36,45 @@ lr.on('line', function(line) // read in a line
         lr.pause();
         i++;
         j++;
-        //console.log('line from file: ', line);
+
+        //corrections to make parsing string easier
         line = line.toString().replace('\t', '_'); // replace the tabs to make delimeter consistent in teh string
         line = line.toString().replace('\t', '_');
-        //console.log(line);
-        var fields = line.toString().split("_"); // split the string by underscore and assign to array
+        line = line.toString().replace('Lack_', 'Lack-');
+        line = line.toString().replace('both_', 'both-');
+        line = line.toString().replace('locus=', '');
+        line = line.toString().replace('scaffold', '');
+
+        var fields = line.toString().split('_'); // split the string by underscore and assign to array
         var genome = new Genome(); // create new object
+
         // genomes fields
         genome.code = fields[0];
         genome.person_id = fields[1];
         genome.coverage = fields[2];
         genome.type = fields[3];
-        genome.build = fields[4];
-        genome.alignment = fields[5];
+        genome.scaffold = fields[4];
+        genome.location = fields[5];
         genome.cog_ref = fields[6];
         genome.kegg_ref = fields[7];
-        genome.species = [];
-        genome.metadata = [];
 
         genome.save(function(err, data) // SAVE
             {
                 if (err)
                 {
-                    lt.emit('error', err, genome);
+                    lr.emit('error', err, genome);
                 }
                 else
                 {
-                    if (j >= 1000){
+                    if (j >= 1000)
+                    {
                         console.log(i + ': saved');
                         j = 0;
                     }
                 }
                 lr.resume();
-            });
+            }
+        );
     });
 
 lr.on('close', function()
@@ -80,3 +82,5 @@ lr.on('close', function()
     console.log('\nRefreshed index;');
     process.exit();
 });
+
+console.log('done');
