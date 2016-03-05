@@ -1,0 +1,99 @@
+{
+  "BlastOutput2": {
+    "report": {
+      "program": "blastn",
+      "version": "BLASTN 2.3.0+",
+      "reference": "Zheng Zhang, Scott Schwartz, Lukas Wagner, and Webb Miller (2000), \"A greedy algorithm for aligning DNA sequences\", J Comput Biol 2000; 7(1-2):203-14.",
+      "search_target": {
+        "db": "/Users/geoffwhitehead/data/network_project/blastdb"
+      },
+      "params": {
+        "expect": 10,
+        "sc_match": 1,
+        "sc_mismatch": -2,
+        "gap_open": 0,
+        "gap_extend": 0,
+        "filter": "L;m;"
+      },
+      "results": {
+        "search": {
+          "query_id": "Query_1",
+          "query_len": 187,
+          "hits": [
+            {
+              "num": 1,
+              "description": [
+                {
+                  "id": "gnl|BL_ORD_ID|0",
+                  "accession": "0",
+                  "title": "GL0017522_MH0001_scaffold14_9_2_700   GL0017522_MH0001_[Lack_5'-end]_[mRNA]_locus=scaffold14_9:2:700:+"
+                }
+              ],
+              "len": 699,
+              "hsps": [
+                {
+                  "num": 1,
+                  "bit_score": 346.444,
+                  "score": 187,
+                  "evalue": 1.81921e-93,
+                  "identity": 187,
+                  "query_from": 1,
+                  "query_to": 187,
+                  "query_strand": "Plus",
+                  "hit_from": 1,
+                  "hit_to": 187,
+                  "hit_strand": "Plus",
+                  "align_len": 187,
+                  "gaps": 0,
+                  "qseq": "CGAAAATTAAAAGACAGGTACAAGAAAATGAAAGATGCAGTATTGATCAAAAGCTTTACCAACGGAATCACGCTTTTAATGAGAGAAGATGCTTCCCTGGAAGAAATCCTGCAGGAACTTGCAGTGAAATTCACCGAGGCAAAGAATTTTTTCGGAACGTCCACCATGGCATTGTCCATGGAGGGAC",
+                  "hseq": "CGAAAATTAAAAGACAGGTACAAGAAAATGAAAGATGCAGTATTGATCAAAAGCTTTACCAACGGAATCACGCTTTTAATGAGAGAAGATGCTTCCCTGGAAGAAATCCTGCAGGAACTTGCAGTGAAATTCACCGAGGCAAAGAATTTTTTCGGAACGTCCACCATGGCATTGTCCATGGAGGGAC",
+                  "midline": "|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+                }
+              ]
+            },
+            {
+              "num": 2,
+              "description": [
+                {
+                  "id": "gnl|BL_ORD_ID|705318",
+                  "accession": "705318",
+                  "title": "GL0082028_MH0026_scaffold1679_3_2123_2794   GL0082028_MH0026_[Complete]_[mRNA]_locus=scaffold1679_3:2123:2794:+"
+                }
+              ],
+              "len": 672,
+              "hsps": [
+                {
+                  "num": 1,
+                  "bit_score": 185.785,
+                  "score": 100,
+                  "evalue": 4.19679e-45,
+                  "identity": 142,
+                  "query_from": 28,
+                  "query_to": 187,
+                  "query_strand": "Plus",
+                  "hit_from": 1,
+                  "hit_to": 160,
+                  "hit_strand": "Plus",
+                  "align_len": 162,
+                  "gaps": 4,
+                  "qseq": "ATGAAAGATGCAGTATTGATCAAAAGCTTTACCA-A-CGGAATCACGCTTTTAATGAGAGAAGATGCTTCCCTGGAAGAAATCCTGCAGGAACTTGCAGTGAAATTCACCGAGGCAAAGAATTTTTTCGGAACGTCCACCATGGCATTGTCCATGGAGGGAC",
+                  "hseq": "ATGAAAGATGCAGTATTGATCAAAAG-TT-ATCAGAGCGGGATCACTCTTCTGATGAGGGAGGATGCTTCCCTGGAAGAAATCCTGCAGGAACTGGCGGTGAAATTCACAGAGGCGAAAAACTTCTTCGGTACGTCCACCATGGCATTATCCATGGAGGGAC",
+                  "midline": "|||||||||||||||||||||||||| || | || | ||| ||||| ||| | ||||| || |||||||||||||||||||||||||||||||| || ||||||||||| ||||| || || || ||||| ||||||||||||||||| |||||||||||||"
+                }
+              ]
+            }
+          ],
+          "stat": {
+            "db_num": 3299820,
+            "db_len": 2323169331,
+            "hsp_len": 28,
+            "eff_space": 354693124989,
+            "kappa": 0.46,
+            "lambda": 1.28,
+            "entropy": 0.85
+          }
+        }
+      }
+    }
+  }
+}

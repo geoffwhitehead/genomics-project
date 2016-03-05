@@ -114,69 +114,56 @@
 
     router.get('/api/data/graph/seq/:_sequence', function(req, res)
     {
-        // create a new file with the query string
-        // var p = path.join(__dirname, '../results/result.txt')
-        // var stream = fs.createWriteStream(p);
-        // stream.once('open', function(fd){
-        //     stream.write(">search_query\n"+req.params._sequence);
-        // });
 
+        var writePath = "/Users/geoffwhitehead/Google Drive/University/Dissertation/network_project/server/blast/query.fa";
+        var resultPath = "/Users/geoffwhitehead/Google Drive/University/Dissertation/network_project/server/blast/results.out";
 
-        // create a child process to handle performing a search
-
-        (function() {
-            var childProcess = require("child_process");
-            var oldSpawn = childProcess.spawn;
-            function mySpawn() {
-                console.log('spawn called');
-                console.log(arguments);
-                var result = oldSpawn.apply(this, arguments);
-                return result;
+        //write query input to a file
+        var fs = require('fs');
+        fs.writeFile(writePath, req.params._sequence, function(err){
+            if (err) {
+                return console.log(err);
             }
-            childProcess.spawn = mySpawn;
-        })();
+            console.log('query saved!');
 
-var spawn = require('child_process').spawn;
-        var _ = require('underscore'); // for some utility goodness
-var workerProcess = spawn('sh', [ './server/results/run.sh' ], {
- // cwd: process.env.HOME + '/myProject',
-  //env:_.extend(process.env, { PATH: process.env.PATH + ':/usr/local/bin' })
-});
+            // create a child process to handle performing a search
 
-        //
-        // for(var i=0; i<3; i++) {
-        //    var workerProcess = child_process.spawn('node', ['./server/results/run.sh', i]);
-     var d = "";
-        //
-        //
-        //
-        //
-           workerProcess.stdout.on('data', function (data) {
-             console.log('stdout: ' + data);
-          });
+            var spawn = require('child_process').spawn;
+            var _ = require('underscore'); // for some utility goodness
+            var workerProcess = spawn('sh', ['./server/scripts/blast_query.sh']);
+            var d = "";
 
-          workerProcess.stderr.on('data', function (data) {
-             console.log('stderr: ' + data);
-             d += data;
-          });
+            workerProcess.stdout.on('data', function(data)
+            {
+                console.log('stdout: ' + data);
+            });
 
-          workerProcess.on('close', function (code) {
-             console.log('child process exited with code ' + code);
-             if (!code) return res.send(d);
-          });
-        // }
-        // fs.access(path, fs.F_OK, function(err)
-        // {
-        //     if (!err)
-        //     {
-        //         // Do something
-        //     }
-        //     else
-        //     {
-        //         // It isn't accessible
-        //     }
-        // });
+            workerProcess.stderr.on('data', function(data)
+            {
+                console.log('stderr: ' + data);
+            });
 
+            workerProcess.on('close', function(code)
+            {
+                fs.access(resultPath, fs.F_OK, function(err)
+                {
+                    if (!err)
+                    {
+                        console.log('file found!')
+                        var data = [];
+                        data.push(createNode('query', 5, 5, '#2d2d2d'));
+                        res.send(data);
+
+                        //process.exit();
+                    }
+                    else
+                    {
+                        console.log("error fetching results: "+code);
+                        return;
+                    }
+                });
+            });
+        });
     });
 
 

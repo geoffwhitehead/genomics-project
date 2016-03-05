@@ -77,7 +77,7 @@ lr.on('line', function(line) // read in a line
         );
     });
 
-lr.on('close', function()
+lr.on('end', function()
 {
     console.log('\nRefreshed index;');
     process.exit();

@@ -14,7 +14,7 @@ mongoose.connect(db, function(err)
     if (err) console.log('1: ' + err);
 });
 
-var file_directory = "/Users/geoffwhitehead/data/network_project/blasts"
+var file_directory = "/Users/geoffwhitehead/data/network_project/blasts/"
 var file = path.join(file_directory, process.argv[2]);
 console.log(file);
 var lr = new LineByLineReader(file);
@@ -103,6 +103,7 @@ lr.on('line', function(line) // read in a line
                                     location: fields[1],
                                     person_id: fields[2],
                                     blast_id: fields[3],
+
                                 })
                             }
                             genome.similar_scaffolds = data;
