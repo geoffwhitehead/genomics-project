@@ -144,6 +144,4 @@ lr.on('end', function()
     console.log('last job completed on: ' + currentdate)
 
     process.exit(0);
-    //
-    // }
 })

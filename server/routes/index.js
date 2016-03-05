@@ -151,13 +151,33 @@
                     {
                         console.log('file found!')
                         var data = [];
-                        data.push(createNode('query', 5, 5, '#2d2d2d'));
-                        res.send(data);
 
-                        //process.exit();
+                        var readline = require('linebyline'),
+                        rl = readline(resultPath);
+
+                        rl.on('line', function(line){
+                            console.log(line + "asdasdasd");
+                        })
+                        .on('error', function(err){
+                            console.log("error: " + err)
+                            res.send({message:'error', data:err})
+                        })
+                        .on('close', function(){
+                            data.push(createNode('query', 5, 5, '#2d2d2d'));
+                            res.send({message:'success', data:data})
+
+                        })
+
+                        //var obj = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+                        //data.push(obj);
+                        //data.push(createNode('query', 5, 5, '#2d2d2d'));
+
+                        //res.send(data);
+
                     }
                     else
                     {
+                        // TODO: handle returning errors to the client
                         console.log("error fetching results: "+code);
                         return;
                     }
