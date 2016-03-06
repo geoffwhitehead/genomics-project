@@ -120,8 +120,10 @@
 
         //write query input to a file
         var fs = require('fs');
-        fs.writeFile(writePath, req.params._sequence, function(err){
-            if (err) {
+        fs.writeFile(writePath, req.params._sequence, function(err)
+        {
+            if (err)
+            {
                 return console.log(err);
             }
             console.log('query saved!');
@@ -150,23 +152,65 @@
                     if (!err)
                     {
                         console.log('file found!')
-                        var data = [];
+                        var data = {};
+                        var data_tabular = [];
+                        var data_nodes = [];
 
                         var readline = require('linebyline'),
-                        rl = readline(resultPath);
+                            rl = readline(resultPath);
 
-                        rl.on('line', function(line){
-                            console.log(line + "asdasdasd");
-                        })
-                        .on('error', function(err){
-                            console.log("error: " + err)
-                            res.send({message:'error', data:err})
-                        })
-                        .on('close', function(){
-                            data.push(createNode('query', 5, 5, '#2d2d2d'));
-                            res.send({message:'success', data:data})
+                        rl.on('line', function(line)
+                            {
+                                line = line.toString().replace('_', '-');
+                                line = line.toString().replace(new RegExp('_', 'g'), ':');
+                                line = line.toString().replace('scaffold', '');
+                                line = line.toString().replace(':', '\t');
+                                line = line.toString().replace(':', '\t');
+                                line = line.toString().replace(':', '\t');
+                                var fields = line.toString().split('\t');
+                                //console.log(fields);
+                                data_tabular.push(
+                                {
+                                    'gene': fields[1],
+                                    'person': fields[2],
+                                    'scaffold': fields[3],
+                                    'location': fields[4],
+                                    '%identity': fields[5],
+                                    'alignment-length': fields[6],
+                                    'mismatches': fields[7],
+                                    'gap-opens': fields[8],
+                                    'query-start': fields[9],
+                                    'query-end': fields[10],
+                                    'sequence-start': fields[11],
+                                    'sequence-end': fields[12],
+                                    'e-value': fields[13],
+                                    'bit-score': fields[14]
 
-                        })
+                                });
+                                var id = fields[1] + fields[2] + fields[3] + fields[4];
+                                var size = fields[5] / 5;
+
+                                data_nodes.push(createNode(id+'node', size, size, '#2d2d2d', fields[1]));
+                                data_nodes.push(createEdge(id+'edge', 'query', id+'node'));
+                            })
+                            .on('error', function(err)
+                            {
+                                console.log("error: " + err)
+                                res.send(
+                                {
+                                    message: 'error',
+                                    data: err
+                                })
+                                return;
+                            })
+                            .on('close', function()
+                            {
+                                data_nodes.push(createNode('query', 5, 5, '#FF0000'))
+                                data['nodes'] = data_nodes;
+                                data['tabular'] = data_tabular;
+                                console.log('sending: ' + data);
+                                res.send(data);
+                            });
 
                         //var obj = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
                         //data.push(obj);
@@ -178,7 +222,7 @@
                     else
                     {
                         // TODO: handle returning errors to the client
-                        console.log("error fetching results: "+code);
+                        console.log("error fetching results: " + code);
                         return;
                     }
                 });
@@ -459,19 +503,21 @@
         res.send(data);
     });
 
-    function createNode(node_id, width, height, colour)
+    function createNode(node_id, width, height, colour, label)
     {
         return {
             group: "nodes",
             data:
             {
                 id: node_id,
+
             },
             style:
             {
                 width: width,
                 height: height,
-                'background-color': colour
+                'background-color': colour,
+                'label': label,
             }
 
         }
