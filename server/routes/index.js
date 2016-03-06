@@ -155,12 +155,16 @@
                         var data = {};
                         var data_tabular = [];
                         var data_nodes = [];
+                        var data_genomes = {};
+                        var result_count = 0;
+                        var processed_count = 0;
 
                         var readline = require('linebyline'),
                             rl = readline(resultPath);
 
                         rl.on('line', function(line)
                             {
+                                result_count++;
                                 line = line.toString().replace('_', '-');
                                 line = line.toString().replace(new RegExp('_', 'g'), ':');
                                 line = line.toString().replace('scaffold', '');
@@ -187,29 +191,59 @@
                                     'bit-score': fields[14]
 
                                 });
-                                var id = fields[1] + fields[2] + fields[3] + fields[4];
-                                var size = fields[5] / 5;
 
-                                data_nodes.push(createNode(id+'node', size, size, '#2d2d2d', fields[1]));
-                                data_nodes.push(createEdge(id+'edge', 'query', id+'node'));
+                                var size = fields[5] / 5;
+                                console.log("gene: " + fields[1]);
+                                console.log("person: " + fields[2]);
+                                console.log("scaffold: " + fields[3]);
+                                console.log("loc: " + fields[4]);
+
+                                Genome.findOne(
+                                    {
+                                        code: fields[1],
+                                        person_id: fields[2],
+                                        scaffold: fields[3],
+                                        location: new RegExp(fields[4] + ":?-?\\+?", "i"), // ignore the :+ or - at the end of locators
+                                    },
+                                    function(err, genome)
+                                    {
+                                        if (genome)
+                                        {
+                                            if (err)
+                                            {
+                                                console.log(err)
+                                            };
+                                            console.log("FOUND    " + genome);
+                                            var name = fields[1] + " - " + fields[5] + " - " + genome.cog_ref + " - " + genome.kegg_ref;
+                                            data_nodes.push(createNode(genome._id, size, size, '#2d2d2d', name));
+                                            data_nodes.push(createEdge(genome._id + ':edge', 'query', genome._id));
+                                            data_genomes[genome._id] = {
+                                                genome
+                                            };
+                                        }
+                                        else
+                                        {
+                                            console.log('ERROR: couldnt find a gene in the dataset, this shouldnt happen as the blast and find are performed on the same data')
+                                        }
+                                        processed_count++;
+                                        if (processed_count == result_count)
+                                        {
+                                            data_nodes.push(createNode('query', 5, 5, '#FF0000'))
+                                            data['nodes'] = data_nodes;
+                                            data['tabular'] = data_tabular;
+                                            data['genomes'] = data_genomes;
+                                            res.send(data);
+                                        }
+                                    }
+                                );
                             })
                             .on('error', function(err)
                             {
                                 console.log("error: " + err)
-                                res.send(
-                                {
-                                    message: 'error',
-                                    data: err
-                                })
-                                return;
                             })
                             .on('close', function()
                             {
-                                data_nodes.push(createNode('query', 5, 5, '#FF0000'))
-                                data['nodes'] = data_nodes;
-                                data['tabular'] = data_tabular;
-                                console.log('sending: ' + data);
-                                res.send(data);
+                                console.log('finished reading in file')
                             });
 
                         //var obj = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
@@ -518,6 +552,7 @@
                 height: height,
                 'background-color': colour,
                 'label': label,
+                'font-size':10,
             }
 
         }
