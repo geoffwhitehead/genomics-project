@@ -37,7 +37,7 @@ lr.on('line', function(line) // read in a line
         linecount++;
         if (linecount == 1)
         {
-            // Do nothing... first line in datasets empty.
+            // Do nothing... first line in dataset is empty.
             lr.resume();
         }
         else

@@ -207,6 +207,7 @@
                                     },
                                     function(err, genome)
                                     {
+                                        console.log("khwjhdgjhwgjdjhwgjhJHGJHGJHGJHGJ " + genome);
                                         if (genome)
                                         {
                                             if (err)
@@ -264,7 +265,79 @@
         });
     });
 
+    router.get('/api/data/graph/seq/expand/:_id', function(req, res)
+    {
+        // find the genome with the id passed as a parameter
+        var search_id = req.params._id;
+        Genome.find(
+        {
+            "_id": search_id
+        }, function(err, genome)
+        {
+            if (genome.length == 1)
+            {
+                console.log(genome);
+                var data = {};
+                var data_nodes = [];
+                var data_genomes = [];
+                var processed = 0;
 
+                for (var i = 0; i < genome[0].similar_scaffolds.length; i++)
+                {
+                    console.log('PROCESSING!!!!!!!!!!!');
+                    // for each of the scaffolds that are similar to that gene find the gene that corresponds to it ... if it exists
+                    Genome.findOne(
+                    {
+                        'person_id': genome[0].similar_scaffolds[i].person_id,
+                        'scaffold': genome[0].similar_scaffolds[i].scaffold,
+                        'location': new RegExp(genome[0].similar_scaffolds[i].location + ".*", "i"), // ignore the :+ or - at the end of locators
+
+                    }, function(err, result)
+                    {
+                        // finally, if a gene is found... create a push a new node to the dataset
+                        if (err) console.log(err);
+                        if (result)
+                        {
+                            console.log("RESULTTTT---" + result);
+                            var name = result.code + " - " + result.cog_ref + " - " + result.kegg_ref;
+                            data_nodes.push(createNode(result._id, 5, 5, '#2d2d2d', name));
+                            data_nodes.push(createEdge(result._id + ':edge', search_id, result._id));
+                            data_genomes[result._id] = {
+                                result
+                            };
+                            processed++;
+                            console.log("pro: " + processed + " : length: " + genome[0].similar_scaffolds.length);
+                            if (processed == genome[0].similar_scaffolds.length)
+                            {
+                                console.log("processing complete");
+                                data['nodes'] = data_nodes;
+                                data['genomes'] = data_genomes;
+                                res.send(data);
+                            }
+                        }
+                        else
+                        {
+                            console.log('NULL RESULT');
+                            processed++;
+                            if (processed == genome[0].similar_scaffolds.length)
+                            {
+                                console.log("processing complete");
+                                data['nodes'] = data_nodes;
+                                data['genomes'] = data_genomes;
+                                console.log(data);
+                                res.send(data);
+                            }
+                        }
+                    });
+                }
+            }
+            else
+            {
+                console.log("error: multiple genomes with same id found")
+            }
+        })
+
+    });
 
 
     // gets some test nodes for graph setup
@@ -552,7 +625,7 @@
                 height: height,
                 'background-color': colour,
                 'label': label,
-                'font-size':10,
+                'font-size': 10,
             }
 
         }
