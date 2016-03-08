@@ -207,17 +207,15 @@
                                     },
                                     function(err, genome)
                                     {
-                                        console.log("khwjhdgjhwgjdjhwgjhJHGJHGJHGJHGJ " + genome);
                                         if (genome)
                                         {
                                             if (err)
                                             {
                                                 console.log(err)
                                             };
-                                            console.log("FOUND    " + genome);
-                                            var name = fields[1] + " - " + fields[5] + " - " + genome.cog_ref + " - " + genome.kegg_ref;
+                                            var name = "COG Ref: "+genome.cog_ref+"\nKEGG Ref: "+ genome.kegg_ref;
                                             data_nodes.push(createNode(genome._id, size, size, '#2d2d2d', name));
-                                            data_nodes.push(createEdge(genome._id + ':edge', 'query', genome._id));
+                                            data_nodes.push(createEdge(genome._id + ':edge', 'query', genome._id, Math.round(fields[5] *10)/10 + "% Match"));
                                             data_genomes[genome._id] = {
                                                 genome
                                             };
@@ -229,7 +227,7 @@
                                         processed_count++;
                                         if (processed_count == result_count)
                                         {
-                                            data_nodes.push(createNode('query', 5, 5, '#FF0000'))
+                                            data_nodes.push(createNode('query', 5, 5, 'red', 'Root Query')) // ROOT NODE
                                             data['nodes'] = data_nodes;
                                             data['tabular'] = data_tabular;
                                             data['genomes'] = data_genomes;
@@ -246,13 +244,6 @@
                             {
                                 console.log('finished reading in file')
                             });
-
-                        //var obj = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
-                        //data.push(obj);
-                        //data.push(createNode('query', 5, 5, '#2d2d2d'));
-
-                        //res.send(data);
-
                     }
                     else
                     {
@@ -272,44 +263,42 @@
         Genome.find(
         {
             "_id": search_id
-        }, function(err, genome)
+        }, function(err, root_genome)
         {
-            if (genome.length == 1)
+            if (root_genome.length == 1)
             {
-                console.log(genome);
+                console.log(root_genome);
                 var data = {};
                 var data_nodes = [];
-                var data_genomes = [];
+                var data_genomes = {};
                 var processed = 0;
 
-                for (var i = 0; i < genome[0].similar_scaffolds.length; i++)
+                for (var i = 0; i < root_genome[0].similar_scaffolds.length; i++)
                 {
-                    console.log('PROCESSING!!!!!!!!!!!');
                     // for each of the scaffolds that are similar to that gene find the gene that corresponds to it ... if it exists
                     Genome.findOne(
                     {
-                        'person_id': genome[0].similar_scaffolds[i].person_id,
-                        'scaffold': genome[0].similar_scaffolds[i].scaffold,
-                        'location': new RegExp(genome[0].similar_scaffolds[i].location + ".*", "i"), // ignore the :+ or - at the end of locators
+                        'person_id': root_genome[0].similar_scaffolds[i].person_id,
+                        'scaffold': root_genome[0].similar_scaffolds[i].scaffold,
+                        'location': new RegExp(root_genome[0].similar_scaffolds[i].location + ".*", "i"), // ignore the :+ or - at the end of locators
 
-                    }, function(err, result)
+                    }, function(err, genome)
                     {
                         // finally, if a gene is found... create a push a new node to the dataset
                         if (err) console.log(err);
-                        if (result)
+                        if (genome)
                         {
-                            console.log("RESULTTTT---" + result);
-                            var name = result.code + " - " + result.cog_ref + " - " + result.kegg_ref;
-                            data_nodes.push(createNode(result._id, 5, 5, '#2d2d2d', name));
-                            data_nodes.push(createEdge(result._id + ':edge', search_id, result._id));
-                            data_genomes[result._id] = {
-                                result
+                            //console.log("RESULTTTT---" + result);
+                            var name = "COG Ref: "+genome.cog_ref+"\nKEGG Ref: "+ genome.kegg_ref;
+                            data_nodes.push(createNode(genome._id, 5, 5, '#2d2d2d', name));
+                            data_nodes.push(createEdge(genome._id + ':edge', search_id, genome._id, "similar"));
+                            data_genomes[genome._id] = {
+                                genome
                             };
+                            //console.log("data genomes!!!!!!!!!!!"+data_genomes);
                             processed++;
-                            console.log("pro: " + processed + " : length: " + genome[0].similar_scaffolds.length);
-                            if (processed == genome[0].similar_scaffolds.length)
+                            if (processed == root_genome[0].similar_scaffolds.length)
                             {
-                                console.log("processing complete");
                                 data['nodes'] = data_nodes;
                                 data['genomes'] = data_genomes;
                                 res.send(data);
@@ -319,12 +308,14 @@
                         {
                             console.log('NULL RESULT');
                             processed++;
-                            if (processed == genome[0].similar_scaffolds.length)
+                            if (processed == root_genome[0].similar_scaffolds.length)
                             {
-                                console.log("processing complete");
+                                if (data_nodes.length == 0 && i == root_genome[0].similar_scaffolds.length) {
+                                    data_nodes.push(createNode(search_id+'nf', 5, 5, 'red', 'No Matches'));
+                                    data_nodes.push(createEdge(search_id+'nf:edge', search_id, genome._id, "No similar scaffolds exist / No genes found for scaffolds"));
+                                }
                                 data['nodes'] = data_nodes;
                                 data['genomes'] = data_genomes;
-                                console.log(data);
                                 res.send(data);
                             }
                         }
@@ -572,12 +563,12 @@
                 for (var cat in meta)
                 {
                     data.push(createNode(cat, 5, 5, '#00ff00'));
-                    data.push(createEdge(cog_query + "" + cat, cog_query, cat));
+                    data.push(createEdge(cog_query + "" + cat, cog_query, cat, ""));
                     //PROPERTY NODES
                     for (var property in meta[cat])
                     {
                         data.push(createNode(property, meta[cat][property], meta[cat][property], '#00ff00'));
-                        data.push(createEdge(cat + "-" + property, cat, property));
+                        data.push(createEdge(cat + "-" + property, cat, property, ""));
                     }
                 };
                 res.send(data);
@@ -621,17 +612,18 @@
             },
             style:
             {
-                width: width,
-                height: height,
+                width: 15,
+                height: 15,
                 'background-color': colour,
                 'label': label,
                 'font-size': 10,
-            }
+            },
+            classes: 'outline multiline-manual'
 
         }
     }
 
-    function createEdge(edge_id, source_node, target_node)
+    function createEdge(edge_id, source_node, target_node, label)
     {
         return { // insert a new edge
             data:
@@ -639,7 +631,12 @@
                 id: edge_id,
                 source: source_node,
                 target: target_node,
-            }
+            },
+            style: {
+                label: label,
+                'font-size':10,
+            },
+            classes: 'autorotate'
         }
     }
 
