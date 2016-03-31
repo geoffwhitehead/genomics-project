@@ -7,14 +7,14 @@ var fs = require('fs'),
     Genome = require('../models/genome'),
     mongoose = require('mongoose'),
     LineByLineReader = require('line-by-line'),
-    db = 'mongodb://localhost/GenomeProject';
+    db = 'mongodb://localhost/gene_project';
 
 mongoose.connect(db, function(err)
 {
     if (err) console.log('1: ' + err);
 });
 
-var file_directory = "/Users/geoffwhitehead/data/network_project/blasts"
+var file_directory = "/Users/geoffwhitehead/data/network_project/blasts/";
 var file = path.join(file_directory, process.argv[2]);
 console.log(file);
 var lr = new LineByLineReader(file);

@@ -4,7 +4,7 @@ var fs = require('fs'),
     path = require('path'),
     Person = require('../models/person'),
     mongoose = require('mongoose'),
-    db = 'mongodb://localhost/GenomeProject';
+    db = 'mongodb://localhost/gene_project';
 
 
 mongoose.connect(db, function(err)

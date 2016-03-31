@@ -5,10 +5,10 @@ var fs = require('fs'),
     Genome = require('../models/genome'),
     mongoose = require('mongoose'),
     LineByLineReader = require('line-by-line'),
-    db = 'mongodb://localhost/GenomeProject';
+    db = 'mongodb://localhost/gene_project';
 
 
-var file = '/Volumes/Portable/Metadata/0-9/geneset_annotated_0-9.fa';
+var file = '/Users/geoffwhitehead/data/network_project/0-9//geneset_annotated_0-9.fa';
 //var file = path.join(__dirname, '/Volumes/Portable/Metadata/');
 var lr = new LineByLineReader(file);
 mongoose.connect(db, function(err)
@@ -25,6 +25,8 @@ Genome.remove(
 
 var i = 0;
 var j = 0;
+var processed = 0;
+var complete = false;
 
 lr.on('error', function(err)
 {
@@ -33,7 +35,7 @@ lr.on('error', function(err)
 
 lr.on('line', function(line) // read in a line
     {
-        lr.pause();
+        //lr.pause();
         i++;
         j++;
 
@@ -66,21 +68,25 @@ lr.on('line', function(line) // read in a line
                 }
                 else
                 {
+                    processed++;
                     if (j >= 1000)
                     {
                         console.log(i + ': saved');
                         j = 0;
                     }
                 }
-                lr.resume();
+                if (complete && processed == i){
+                    console.log('\nfinished processing;');
+                    process.exit();
+                }
+                //lr.resume();
             }
         );
     });
 
 lr.on('end', function()
 {
-    console.log('\nRefreshed index;');
-    process.exit();
+    console.log('\nfinished reading in file;');
+    complete = true;
+    //process.exit();
 });
-
-console.log('done');

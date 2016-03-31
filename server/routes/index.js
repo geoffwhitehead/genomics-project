@@ -1,157 +1,127 @@
-(function()
-{
+( function() {
     'use strict';
-    var express = require('express');
-    var path = require('path');
+    var express = require( 'express' );
+    var path = require( 'path' );
     var router = express.Router();
-    var mongoose = require('mongoose');
-    var Genome = require('../models/genome.js');
-    var Person = require('../models/person.js');
-    var bodyParser = require('body-parser');
-    var _ = require('underscore');
-    var db = 'mongodb://localhost/GenomeProject';
+    var mongoose = require( 'mongoose' );
+    var Genome = require( '../models/genome.js' );
+    var Person = require( '../models/person.js' );
+    var Cog = require('../models/cog.js');
+    var bodyParser = require( 'body-parser' );
+    var _ = require( 'underscore' );
+    var db = 'mongodb://localhost/gene_project';
 
-    mongoose.connect(db, function(err)
-    {
-        if (err) console.log(err);
-    });
+    mongoose.connect( db, function( err ) {
+        if ( err ) console.log( err );
+    } );
 
-    router.use(bodyParser.urlencoded(
-    {
+    router.use( bodyParser.urlencoded( {
         extended: true
-    }));
-    router.use(bodyParser.json());
+    } ) );
+    router.use( bodyParser.json() );
 
     // requires for the file reader
 
-    var fs = require('fs');
+    var fs = require( 'fs' );
 
     /* GET home page. */
-    router.get('/', function(req, res)
-    {
-        res.render('index');
-    });
+    router.get( '/', function( req, res ) {
+        res.render( 'index' );
+    } );
 
+    //COG SEARCH
+    router.get( '/api/data/genes/:_searchString', function( req, res ) {
+        console.log( 'sending some data' );
 
-
-    //GENE SEARCH
-    //TODO will need to change this to access database of cogs rather than the actual gene set
-    router.get('/api/data/genes/:_searchString', function(req, res)
-    {
-        console.log('sending some data');
-
-        Genome.find(
-        {
-            "cog_ref": new RegExp(req.params._searchString)
-        }, function(err, data)
-        {
-            console.log('searched: ' + req.params._searchString + "-- returned: " + data);
-            if (err) res.send(err);
-            else res.send(data);
-        }).limit(5);
-    });
+        Cog.find( {
+            "cog_id": new RegExp( req.params._searchString )
+        }, function( err, data ) {
+            console.log( 'searched: ' + req.params._searchString + "-- returned: " + data );
+            if ( err ) res.send( err );
+            else res.send( data );
+        } ).limit( 10 );
+    } );
 
     // ******* REF GRAPH 1 *******
-    router.get('/api/data/graph/ref/1/:_cog', function(req, res)
-    {
+    router.get( '/api/data/graph/ref/1/:_cog', function( req, res ) {
         var data = [];
         var cog_query = req.params._cog;
-        console.log('getting ref graph with cog: ' + cog_query);
+        console.log( 'getting ref graph with cog: ' + cog_query );
 
-        Genome.find(
-        {
-            "cog_ref": new RegExp(req.params._cog)
-        }, function(err, results)
-        {
+        Cog.find( {
+            "cog_id": new RegExp( req.params._cog )
+        }, function( err, results ) {
 
-            data.push(
-            { // insert a new node
+            data.push( { // insert a new node
                 group: "nodes",
-                data:
-                {
+                data: {
                     id: cog_query,
                 },
-                position:
-                {
+                position: {
                     x: 100,
                     y: 100
                 },
-            });
-            console.log(cog_query);
-            for (var i = 0; i < results.length; i++)
-            {
-                data.push(
-                { // insert a new node
+            } );
+            console.log( cog_query );
+            for ( var i = 0; i < results.length; i++ ) {
+                data.push( { // insert a new node
                     group: "nodes",
-                    data:
-                    {
-                        id: results[i].code,
+                    data: {
+                        id: results[ i ].code,
                     },
-                    position:
-                    {
+                    position: {
                         x: 100,
                         y: 100
                     },
-                });
+                } );
                 // insert an edge for the new node
-                data.push(
-                {
-                    data:
-                    {
-                        id: cog_query + "-" + results[i].code,
+                data.push( {
+                    data: {
+                        id: cog_query + "-" + results[ i ].code,
                         source: cog_query,
-                        target: results[i].code
+                        target: results[ i ].code
                     }
-                });
+                } );
             }
-            console.log("RESULT: " + data);
-            if (err) res.send(err);
-            else res.send(data);
+            console.log( "RESULT: " + data );
+            if ( err ) res.send( err );
+            else res.send( data );
 
-        });
+        } );
+    } );
 
-    });
-
-    router.get('/api/data/graph/seq/:_sequence', function(req, res)
-    {
+    router.get( '/api/data/graph/seq/:_sequence', function( req, res ) {
 
         var writePath = "/Users/geoffwhitehead/Google Drive/University/Dissertation/network_project/server/blast/query.fa";
         var resultPath = "/Users/geoffwhitehead/Google Drive/University/Dissertation/network_project/server/blast/results.out";
 
         //write query input to a file
-        var fs = require('fs');
-        fs.writeFile(writePath, req.params._sequence, function(err)
-        {
-            if (err)
-            {
-                return console.log(err);
+        var fs = require( 'fs' );
+        fs.writeFile( writePath, req.params._sequence, function( err ) {
+            if ( err ) {
+                return console.log( err );
             }
-            console.log('query saved!');
+            console.log( 'query saved!' );
 
             // create a child process to handle performing a search
 
-            var spawn = require('child_process').spawn;
-            var _ = require('underscore'); // for some utility goodness
-            var workerProcess = spawn('sh', ['./server/scripts/blast_query.sh']);
+            var spawn = require( 'child_process' ).spawn;
+            var _ = require( 'underscore' ); // for some utility goodness
+            var workerProcess = spawn( 'sh', [ './server/scripts/blast_query.sh' ] );
             var d = "";
 
-            workerProcess.stdout.on('data', function(data)
-            {
-                console.log('stdout: ' + data);
-            });
+            workerProcess.stdout.on( 'data', function( data ) {
+                console.log( 'stdout: ' + data );
+            } );
 
-            workerProcess.stderr.on('data', function(data)
-            {
-                console.log('stderr: ' + data);
-            });
+            workerProcess.stderr.on( 'data', function( data ) {
+                console.log( 'stderr: ' + data );
+            } );
 
-            workerProcess.on('close', function(code)
-            {
-                fs.access(resultPath, fs.F_OK, function(err)
-                {
-                    if (!err)
-                    {
-                        console.log('file found!')
+            workerProcess.on( 'close', function( code ) {
+                fs.access( resultPath, fs.F_OK, function( err ) {
+                    if ( !err ) {
+                        console.log( 'file found!' )
                         var data = {};
                         var data_tabular = [];
                         var data_nodes = [];
@@ -159,220 +129,188 @@
                         var result_count = 0;
                         var processed_count = 0;
 
-                        var readline = require('linebyline'),
-                            rl = readline(resultPath);
+                        var readline = require( 'linebyline' ),
+                            rl = readline( resultPath );
 
-                        rl.on('line', function(line)
-                            {
+                        rl.on( 'line', function( line ) {
                                 result_count++;
-                                line = line.toString().replace('_', '-');
-                                line = line.toString().replace(new RegExp('_', 'g'), ':');
-                                line = line.toString().replace('scaffold', '');
-                                line = line.toString().replace(':', '\t');
-                                line = line.toString().replace(':', '\t');
-                                line = line.toString().replace(':', '\t');
-                                var fields = line.toString().split('\t');
+                                line = line.toString().replace( '_', '-' );
+                                line = line.toString().replace( new RegExp( '_', 'g' ), ':' );
+                                line = line.toString().replace( 'scaffold', '' );
+                                line = line.toString().replace( ':', '\t' );
+                                line = line.toString().replace( ':', '\t' );
+                                line = line.toString().replace( ':', '\t' );
+                                var fields = line.toString().split( '\t' );
                                 //console.log(fields);
-                                data_tabular.push(
-                                {
-                                    'gene': fields[1],
-                                    'person': fields[2],
-                                    'scaffold': fields[3],
-                                    'location': fields[4],
-                                    '%identity': fields[5],
-                                    'alignment-length': fields[6],
-                                    'mismatches': fields[7],
-                                    'gap-opens': fields[8],
-                                    'query-start': fields[9],
-                                    'query-end': fields[10],
-                                    'sequence-start': fields[11],
-                                    'sequence-end': fields[12],
-                                    'e-value': fields[13],
-                                    'bit-score': fields[14]
+                                data_tabular.push( {
+                                    'gene': fields[ 1 ],
+                                    'person': fields[ 2 ],
+                                    'scaffold': fields[ 3 ],
+                                    'location': fields[ 4 ],
+                                    '%identity': fields[ 5 ],
+                                    'alignment-length': fields[ 6 ],
+                                    'mismatches': fields[ 7 ],
+                                    'gap-opens': fields[ 8 ],
+                                    'query-start': fields[ 9 ],
+                                    'query-end': fields[ 10 ],
+                                    'sequence-start': fields[ 11 ],
+                                    'sequence-end': fields[ 12 ],
+                                    'e-value': fields[ 13 ],
+                                    'bit-score': fields[ 14 ]
 
-                                });
+                                } );
 
-                                var size = fields[5] / 5;
-                                console.log("gene: " + fields[1]);
-                                console.log("person: " + fields[2]);
-                                console.log("scaffold: " + fields[3]);
-                                console.log("loc: " + fields[4]);
+                                var size = fields[ 5 ] / 5;
+                                console.log( "gene: " + fields[ 1 ] );
+                                console.log( "person: " + fields[ 2 ] );
+                                console.log( "scaffold: " + fields[ 3 ] );
+                                console.log( "loc: " + fields[ 4 ] );
 
-                                Genome.findOne(
-                                    {
-                                        code: fields[1],
-                                        person_id: fields[2],
-                                        scaffold: fields[3],
-                                        location: new RegExp(fields[4] + ":?-?\\+?", "i"), // ignore the :+ or - at the end of locators
+                                Genome.findOne( {
+                                        code: fields[ 1 ],
+                                        person_id: fields[ 2 ],
+                                        scaffold: fields[ 3 ],
+                                        location: new RegExp( fields[ 4 ] + ":?-?\\+?", "i" ), // ignore the :+ or - at the end of locators
                                     },
-                                    function(err, genome)
-                                    {
-                                        if (genome)
-                                        {
-                                            if (err)
-                                            {
-                                                console.log(err)
+                                    function( err, genome ) {
+                                        if ( genome ) {
+                                            if ( err ) {
+                                                console.log( err )
                                             };
-                                            var name = "COG Ref: "+genome.cog_ref+"\nKEGG Ref: "+ genome.kegg_ref;
-                                            data_nodes.push(createNode(genome._id, size, size, '#2d2d2d', name));
-                                            data_nodes.push(createEdge(genome._id + ':edge', 'query', genome._id, Math.round(fields[5] *10)/10 + "% Match"));
-                                            data_genomes[genome._id] = {
+                                            var name = "COG Ref: " + genome.cog_ref + "\nKEGG Ref: " + genome.kegg_ref;
+                                            data_nodes.push( createNode( genome._id, size, size, '#2d2d2d', name ) );
+                                            data_nodes.push( createEdge( genome._id + ':edge', 'query', genome._id, Math.round( fields[ 5 ] * 10 ) / 10 + "% Match" ) );
+                                            data_genomes[ genome._id ] = {
                                                 genome
                                             };
                                         }
-                                        else
-                                        {
-                                            console.log('ERROR: couldnt find a gene in the dataset, this shouldnt happen as the blast and find are performed on the same data')
+                                        else {
+                                            console.log( 'ERROR: couldnt find a gene in the dataset, this shouldnt happen as the blast and find are performed on the same data' )
                                         }
                                         processed_count++;
-                                        if (processed_count == result_count)
-                                        {
-                                            data_nodes.push(createNode('query', 5, 5, 'red', 'Root Query')) // ROOT NODE
-                                            data['nodes'] = data_nodes;
-                                            data['tabular'] = data_tabular;
-                                            data['genomes'] = data_genomes;
-                                            res.send(data);
+                                        if ( processed_count == result_count ) {
+                                            data_nodes.push( createNode( 'query', 5, 5, 'red', 'Root Query' ) ) // ROOT NODE
+                                            data[ 'nodes' ] = data_nodes;
+                                            data[ 'tabular' ] = data_tabular;
+                                            data[ 'genomes' ] = data_genomes;
+                                            res.send( data );
                                         }
                                     }
                                 );
-                            })
-                            .on('error', function(err)
-                            {
-                                console.log("error: " + err)
-                            })
-                            .on('close', function()
-                            {
-                                console.log('finished reading in file')
-                            });
+                            } )
+                            .on( 'error', function( err ) {
+                                console.log( "error: " + err )
+                            } )
+                            .on( 'close', function() {
+                                console.log( 'finished reading in file' )
+                            } );
                     }
-                    else
-                    {
+                    else {
                         // TODO: handle returning errors to the client
-                        console.log("error fetching results: " + code);
+                        console.log( "error fetching results: " + code );
                         return;
                     }
-                });
-            });
-        });
-    });
+                } );
+            } );
+        } );
+    } );
 
-    router.get('/api/data/graph/seq/expand/:_id', function(req, res)
-    {
+    router.get( '/api/data/graph/seq/expand/:_id', function( req, res ) {
         // find the genome with the id passed as a parameter
         var search_id = req.params._id;
-        Genome.find(
-        {
+        Genome.find( {
             "_id": search_id
-        }, function(err, root_genome)
-        {
-            if (root_genome.length == 1)
-            {
-                console.log(root_genome);
+        }, function( err, root_genome ) {
+            if ( root_genome.length == 1 ) {
+                console.log( root_genome );
                 var data = {};
                 var data_nodes = [];
                 var data_genomes = {};
                 var processed = 0;
 
-                for (var i = 0; i < root_genome[0].similar_scaffolds.length; i++)
-                {
+                for ( var i = 0; i < root_genome[ 0 ].similar_scaffolds.length; i++ ) {
                     // for each of the scaffolds that are similar to that gene find the gene that corresponds to it ... if it exists
-                    Genome.findOne(
-                    {
-                        'person_id': root_genome[0].similar_scaffolds[i].person_id,
-                        'scaffold': root_genome[0].similar_scaffolds[i].scaffold,
-                        'location': new RegExp(root_genome[0].similar_scaffolds[i].location + ".*", "i"), // ignore the :+ or - at the end of locators
+                    Genome.findOne( {
+                        'person_id': root_genome[ 0 ].similar_scaffolds[ i ].person_id,
+                        'scaffold': root_genome[ 0 ].similar_scaffolds[ i ].scaffold,
+                        'location': new RegExp( root_genome[ 0 ].similar_scaffolds[ i ].location + ".*", "i" ), // ignore the :+ or - at the end of locators
 
-                    }, function(err, genome)
-                    {
+                    }, function( err, genome ) {
                         // finally, if a gene is found... create a push a new node to the dataset
-                        if (err) console.log(err);
-                        if (genome)
-                        {
+                        if ( err ) console.log( err );
+                        if ( genome ) {
                             //console.log("RESULTTTT---" + result);
-                            var name = "COG Ref: "+genome.cog_ref+"\nKEGG Ref: "+ genome.kegg_ref;
-                            data_nodes.push(createNode(genome._id, 5, 5, '#2d2d2d', name));
-                            data_nodes.push(createEdge(genome._id + ':edge', search_id, genome._id, "similar"));
-                            data_genomes[genome._id] = {
+                            var name = "COG Ref: " + genome.cog_ref + "\nKEGG Ref: " + genome.kegg_ref;
+                            data_nodes.push( createNode( genome._id, 5, 5, '#2d2d2d', name ) );
+                            data_nodes.push( createEdge( genome._id + ':edge', search_id, genome._id, "similar" ) );
+                            data_genomes[ genome._id ] = {
                                 genome
                             };
                             //console.log("data genomes!!!!!!!!!!!"+data_genomes);
                             processed++;
-                            if (processed == root_genome[0].similar_scaffolds.length)
-                            {
-                                data['nodes'] = data_nodes;
-                                data['genomes'] = data_genomes;
-                                res.send(data);
+                            if ( processed == root_genome[ 0 ].similar_scaffolds.length ) {
+                                data[ 'nodes' ] = data_nodes;
+                                data[ 'genomes' ] = data_genomes;
+                                res.send( data );
                             }
                         }
-                        else
-                        {
-                            console.log('NULL RESULT');
+                        else {
+                            console.log( 'NULL RESULT' );
                             processed++;
-                            if (processed == root_genome[0].similar_scaffolds.length)
-                            {
-                                if (data_nodes.length == 0 && i == root_genome[0].similar_scaffolds.length) {
-                                    data_nodes.push(createNode(search_id+'nf', 5, 5, 'red', 'No Matches'));
-                                    data_nodes.push(createEdge(search_id+'nf:edge', search_id, genome._id, "No similar scaffolds exist / No genes found for scaffolds"));
+                            if ( processed == root_genome[ 0 ].similar_scaffolds.length ) {
+                                if ( data_nodes.length == 0 && i == root_genome[ 0 ].similar_scaffolds.length ) {
+                                    data_nodes.push( createNode( search_id + 'nf', 5, 5, 'red', 'No Matches' ) );
+                                    data_nodes.push( createEdge( search_id + 'nf:edge', search_id, genome._id, "No similar scaffolds exist / No genes found for scaffolds" ) );
                                 }
-                                data['nodes'] = data_nodes;
-                                data['genomes'] = data_genomes;
-                                res.send(data);
+                                data[ 'nodes' ] = data_nodes;
+                                data[ 'genomes' ] = data_genomes;
+                                res.send( data );
                             }
                         }
-                    });
+                    } );
                 }
             }
-            else
-            {
-                console.log("error: multiple genomes with same id found")
+            else {
+                console.log( "error: multiple genomes with same id found" )
             }
-        })
+        } )
 
-    });
+    } );
 
 
     // gets some test nodes for graph setup
-    router.get('/api/data/nodes', function(req, res)
-    {
-        console.log('sending some data');
+    router.get( '/api/data/nodes', function( req, res ) {
+        console.log( 'sending some data' );
         var data = [];
 
-        data.push(
-        { // node a
+        data.push( { // node a
             group: "nodes",
-            data:
-            {
+            data: {
                 id: 'a'
             },
-            position:
-            {
+            position: {
                 x: 100,
                 y: 200
             },
-        });
-        res.send(data);
-    });
+        } );
+        res.send( data );
+    } );
 
     // ******* REF GRAPH 2 *******
 
-    router.get('/api/data/graph/ref/2/:_cog', function(req, res)
-    {
+    router.get( '/api/data/graph/ref/2/:_cog', function( req, res ) {
         var data = [];
         var cog_query = req.params._cog;
-        console.log('getting graph 2 with  with cog: ' + cog_query);
+        console.log( 'getting graph 2 with  with cog: ' + cog_query );
 
         var people = {};
         var temp = '';
-        Person.find(
-        {}, function(err, results)
-        {
-            if (err) res.send(err);
-            for (var i = 0; i < results.length; i++)
-            {
+        Person.find( {}, function( err, results ) {
+            if ( err ) res.send( err );
+            for ( var i = 0; i < results.length; i++ ) {
                 // added this line to filter out all the results that are UNMAPPED, V1, or O2.
-                if ((results[i].id != 'unmapped') || (results[i].id != 'V1') || (results[i].id != 'O2'))
-                {
-                    people[results[i].id] = 0;
+                if ( ( results[ i ].id != 'unmapped' ) || ( results[ i ].id != 'V1' ) || ( results[ i ].id != 'O2' ) ) {
+                    people[ results[ i ].id ] = 0;
                 }
             }
             // add the groups
@@ -381,41 +319,33 @@
             // people['O2'] = 0;
             //console.log("RESULT: " + people);
 
-            Genome.find(
-            {
-                "cog_ref": new RegExp(cog_query)
-            }, function(err, results)
-            {
+            Genome.find( {
+                "cog_ref": new RegExp( cog_query )
+            }, function( err, results ) {
 
-                if (err) res.send(err);
-                for (var i = 0; i < results.length; i++)
-                {
-                    people[results[i].person_id]++;
+                if ( err ) res.send( err );
+                for ( var i = 0; i < results.length; i++ ) {
+                    people[ results[ i ].person_id ]++;
                 }
+                data.push( createNode( cog_query, 50, 50, '#2d2d2d' ) );
 
-
-                data.push(createNode(cog_query, 50, 50, '#2d2d2d'));
-
-                for (var p in people)
-                {
-                    data.push(createNode(p, people[p], people[p], '#2d2d2d'));
+                for ( var p in people ) {
+                    data.push( createNode( p, people[ p ], people[ p ], '#2d2d2d' ) );
                 }
-                res.send(data);
-            });
-        });
-    });
+                res.send( data );
+            } );
+        } );
+    } );
 
     // ******* REF GRAPH 3 *******
 
-    router.get('/api/data/graph/ref/3/:_cog', function(req, res)
-    {
+    router.get( '/api/data/graph/ref/3/:_cog', function( req, res ) {
         var data = [];
         var cog_query = req.params._cog;
-        console.log('getting graph 3 with  with cog: ' + cog_query);
+        console.log( 'getting graph 3 with  with cog: ' + cog_query );
 
         var meta = {
-            age:
-            {
+            age: {
                 '0-10': 0,
                 '11-20': 0,
                 '21-30': 0,
@@ -424,25 +354,21 @@
                 '51-60': 0,
                 '>60': 0,
             },
-            gender:
-            {
+            gender: {
                 male: 0,
                 female: 0,
             },
-            bmi:
-            {
+            bmi: {
                 underweight: 0,
                 normal: 0,
                 overweight: 0,
                 obese: 0
             },
-            ibd:
-            {
+            ibd: {
                 yes: 0,
                 no: 0,
             },
-            nationality:
-            {
+            nationality: {
                 denmark: 0,
                 spain: 0,
             }
@@ -452,166 +378,133 @@
         var temp = '';
         var people = [];
 
-        Person.find(
-        {}, function(err, results)
-        {
-            if (err) res.send(err);
+        Person.find( {}, function( err, results ) {
+            if ( err ) res.send( err );
 
-            for (var i = 0; i < results.length; i++)
-            {
-                people[results[i].id] = results[i];
+            for ( var i = 0; i < results.length; i++ ) {
+                people[ results[ i ].id ] = results[ i ];
             }
 
-            Genome.find(
-            {
-                "cog_ref": new RegExp(cog_query)
-            }, function(err, results)
-            {
-                if (err) res.send(err);
+            Genome.find( {
+                "cog_ref": new RegExp( cog_query )
+            }, function( err, results ) {
+                if ( err ) res.send( err );
                 //console.log('SIZE: '+results.length );
                 //console.log('QUERY'+cog_query);
-                for (var i = 0; i < results.length; i++)
-                {
+                for ( var i = 0; i < results.length; i++ ) {
                     // added this line to filter out all the results that are UNMAPPED, V1, or O2.
-                    if ((results[i].person_id != 'unmapped') && (results[i].person_id != 'V1') && (results[i].person_id != 'O2'))
-                    {
+                    if ( ( results[ i ].person_id != 'unmapped' ) && ( results[ i ].person_id != 'V1' ) && ( results[ i ].person_id != 'O2' ) ) {
                         // adjust all the metadata for this person here!!!!!!
-                        var person = people[results[i].person_id];
+                        var person = people[ results[ i ].person_id ];
                         //console.log("PERSON: "+person);
                         //AGE
-                        if (person['age'] <= 10)
-                        {
-                            meta.age['0-10']++
+                        if ( person[ 'age' ] <= 10 ) {
+                            meta.age[ '0-10' ]++
                         }
-                        else if (person['age'] <= 20)
-                        {
-                            meta.age['11-20']++
+                        else if ( person[ 'age' ] <= 20 ) {
+                            meta.age[ '11-20' ]++
                         }
-                        else if (person['age'] <= 30)
-                        {
-                            meta.age['21-30']++
+                        else if ( person[ 'age' ] <= 30 ) {
+                            meta.age[ '21-30' ]++
                         }
-                        else if (person['age'] <= 40)
-                        {
-                            meta.age['31-40']++
+                        else if ( person[ 'age' ] <= 40 ) {
+                            meta.age[ '31-40' ]++
                         }
-                        else if (person['age'] <= 50)
-                        {
-                            meta.age['41-50']++
+                        else if ( person[ 'age' ] <= 50 ) {
+                            meta.age[ '41-50' ]++
                         }
-                        else if (person['age'] <= 60)
-                        {
-                            meta.age['51-60']++
+                        else if ( person[ 'age' ] <= 60 ) {
+                            meta.age[ '51-60' ]++
                         }
-                        else
-                        {
-                            meta.age['>60']++
+                        else {
+                            meta.age[ '>60' ]++
                         };
 
                         //gender
-                        if (person['gender'] == 'male')
-                        {
-                            meta.gender['male']++
+                        if ( person[ 'gender' ] == 'male' ) {
+                            meta.gender[ 'male' ]++
                         }
-                        else
-                        {
-                            meta.gender['female']++
+                        else {
+                            meta.gender[ 'female' ]++
                         }
                         //bmi
-                        if (person['bmi'] < 18.25)
-                        {
-                            meta.bmi['underweight']++
+                        if ( person[ 'bmi' ] < 18.25 ) {
+                            meta.bmi[ 'underweight' ]++
                         }
-                        else if (person['bmi'] <= 25)
-                        {
-                            meta.bmi['normal']++
+                        else if ( person[ 'bmi' ] <= 25 ) {
+                            meta.bmi[ 'normal' ]++
                         }
-                        else if (person['bmi'] <= 30)
-                        {
-                            meta.bmi['overweight']++
+                        else if ( person[ 'bmi' ] <= 30 ) {
+                            meta.bmi[ 'overweight' ]++
                         }
-                        else
-                        {
-                            meta.bmi['obese']++
+                        else {
+                            meta.bmi[ 'obese' ]++
                         }
 
                         //ibd
-                        if (person['ibd'] == 'yes')
-                        {
-                            meta.ibd['yes']++
+                        if ( person[ 'ibd' ] == 'yes' ) {
+                            meta.ibd[ 'yes' ]++
                         }
-                        else
-                        {
-                            meta.ibd['no']++
+                        else {
+                            meta.ibd[ 'no' ]++
                         }
                         //nationality
-                        if (person['nationality'] == 'spain')
-                        {
-                            meta.nationality['spain']++
+                        if ( person[ 'nationality' ] == 'spain' ) {
+                            meta.nationality[ 'spain' ]++
                         }
-                        else
-                        {
-                            meta.nationality['denmark']++
+                        else {
+                            meta.nationality[ 'denmark' ]++
                         }
                     }
                 }
 
                 // BASE NODE
-                data.push(createNode(cog_query, 20, 20, '#ff0000'));
+                data.push( createNode( cog_query, 20, 20, '#ff0000' ) );
 
                 // CATEGORY NODES
-                for (var cat in meta)
-                {
-                    data.push(createNode(cat, 5, 5, '#00ff00'));
-                    data.push(createEdge(cog_query + "" + cat, cog_query, cat, ""));
+                for ( var cat in meta ) {
+                    data.push( createNode( cat, 5, 5, '#00ff00' ) );
+                    data.push( createEdge( cog_query + "" + cat, cog_query, cat, "" ) );
                     //PROPERTY NODES
-                    for (var property in meta[cat])
-                    {
-                        data.push(createNode(property, meta[cat][property], meta[cat][property], '#00ff00'));
-                        data.push(createEdge(cat + "-" + property, cat, property, ""));
+                    for ( var property in meta[ cat ] ) {
+                        data.push( createNode( property, meta[ cat ][ property ], meta[ cat ][ property ], '#00ff00' ) );
+                        data.push( createEdge( cat + "-" + property, cat, property, "" ) );
                     }
                 };
-                res.send(data);
-            }); //end find
+                res.send( data );
+            } ); //end find
 
-        });
+        } );
 
-    });
+    } );
 
 
     // gets some test nodes for graph setup
-    router.get('/api/data/nodes', function(req, res)
-    {
-        console.log('sending some data');
+    router.get( '/api/data/nodes', function( req, res ) {
+        console.log( 'sending some data' );
         var data = [];
 
-        data.push(
-        { // node a
+        data.push( { // node a
             group: "nodes",
-            data:
-            {
+            data: {
                 id: 'a'
             },
-            position:
-            {
+            position: {
                 x: 100,
                 y: 200
             }
-        });
-        res.send(data);
-    });
+        } );
+        res.send( data );
+    } );
 
-    function createNode(node_id, width, height, colour, label)
-    {
+    function createNode( node_id, width, height, colour, label ) {
         return {
             group: "nodes",
-            data:
-            {
+            data: {
                 id: node_id,
 
             },
-            style:
-            {
+            style: {
                 width: 15,
                 height: 15,
                 'background-color': colour,
@@ -623,18 +516,16 @@
         }
     }
 
-    function createEdge(edge_id, source_node, target_node, label)
-    {
+    function createEdge( edge_id, source_node, target_node, label ) {
         return { // insert a new edge
-            data:
-            {
+            data: {
                 id: edge_id,
                 source: source_node,
                 target: target_node,
             },
             style: {
                 label: label,
-                'font-size':10,
+                'font-size': 10,
             },
             classes: 'autorotate'
         }
@@ -772,4 +663,4 @@
     */
     module.exports = router;
 
-}());
+}() );

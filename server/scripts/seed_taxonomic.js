@@ -5,14 +5,14 @@ var fs = require('fs'),
     Genome = require('../models/genome'),
     mongoose = require('mongoose'),
     LineByLineReader = require('line-by-line'),
-    db = 'mongodb://localhost/GenomeProject';
+    db = 'mongodb://localhost/gene_project';
 
 mongoose.connect(db, function(err)
 {
     if (err) console.log('1: ' + err);
 });
 
-var file = '/Volumes/Portable/Metadata/0-9/geneset_taxonomy_0-9.fa';
+var file = '/Users/geoffwhitehead/data/network_project/0-9/geneset_taxonomy_0-9.fa';
 var lr = new LineByLineReader(file);
 
 var i = 0;
