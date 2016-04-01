@@ -6,10 +6,16 @@
     var mongoose = require( 'mongoose' );
     var Genome = require( '../models/genome.js' );
     var Person = require( '../models/person.js' );
-    var Cog = require('../models/cog.js');
+    var Cog = require( '../models/cog.js' );
     var bodyParser = require( 'body-parser' );
     var _ = require( 'underscore' );
     var db = 'mongodb://localhost/gene_project';
+
+
+
+    const NODE_SIZE = 10;
+
+
 
     mongoose.connect( db, function( err ) {
         if ( err ) console.log( err );
@@ -42,46 +48,40 @@
         } ).limit( 10 );
     } );
 
-    // ******* REF GRAPH 1 *******
+    function findPersonIndex( array, person_id ) {
+        for ( var i = 0; i < array.length; i++ ) {
+            if ( array[ i ].id == person_id ) {
+                return i;
+            }
+        }
+    }
+
+    // ******* REF GRAPH - Cohort Distribution *******
     router.get( '/api/data/graph/ref/1/:_cog', function( req, res ) {
         var data = [];
         var cog_query = req.params._cog;
+
         console.log( 'getting ref graph with cog: ' + cog_query );
 
-        Cog.find( {
+        Cog.findOne( {
             "cog_id": new RegExp( req.params._cog )
-        }, function( err, results ) {
+        }, function( err, result ) {
+            if ( result.length > 0 ) {
 
-            data.push( { // insert a new node
-                group: "nodes",
-                data: {
-                    id: cog_query,
-                },
-                position: {
-                    x: 100,
-                    y: 100
-                },
-            } );
-            console.log( cog_query );
-            for ( var i = 0; i < results.length; i++ ) {
-                data.push( { // insert a new node
-                    group: "nodes",
-                    data: {
-                        id: results[ i ].code,
-                    },
-                    position: {
-                        x: 100,
-                        y: 100
-                    },
-                } );
-                // insert an edge for the new node
-                data.push( {
-                    data: {
-                        id: cog_query + "-" + results[ i ].code,
-                        source: cog_query,
-                        target: results[ i ].code
+                data.push( createNode( cog_query, NODE_SIZE, NODE_SIZE, '#2d2d2d', cog_query ) );
+
+                data.push( createEdge( 'e_dist', cog_query, 'n_dist', 'Cohort Distribution' ) );
+                data.push( createNode( 'n_dist', NODE_SIZE, NODE_SIZE, '#2d2d2d', 'Distribution' ) );
+                for ( var i = 0; i < result.sampled_from.length; i++ ) {
+                    var size = result.sampled_from[ i ].count;
+                    if (size > 25) {
+                        size = 25;
                     }
-                } );
+                    if ( size > 0 ) {
+                        data.push( createNode( 'n_dist_' + result.sampled_from[ i ].id, size, size, '#2d2d2d', result.sampled_from[ i ].id ) );
+                        data.push( createEdge( 'e_dist_' + result.sampled_from[ i ].id, 'n_dist', 'n_dist_' + result.sampled_from[ i ].id, size + ' occurrences' ) );
+                    }
+                }
             }
             console.log( "RESULT: " + data );
             if ( err ) res.send( err );
@@ -89,6 +89,184 @@
 
         } );
     } );
+
+    // ******* REF GRAPH - metadata *******
+
+    router.get( '/api/data/graph/ref/2/:_cog', function( req, res ) {
+        var data = [];
+        var cog_query = req.params._cog;
+
+        Cog.findOne( {cog_id : cog_query}, function( err, result ) {
+            if (result.length == 1) {
+                console.log(result);
+                data.push( createNode( cog_query, NODE_SIZE, NODE_SIZE, '#2d2d2d', cog_query ) );
+
+                data.push( createEdge( 'e_age', cog_query, 'n_age', 'Distribution over age' ) );
+                data.push( createNode( 'n_age', NODE_SIZE, NODE_SIZE, '#2d2d2d', 'Age' ) );
+                for (var i = 0; i < result.metadata.age.length; i++) {
+                    for (var prop in result.metadata.age) {
+                        if (Object.hasOwnProperty(prop)) {
+                            var size = prop.count;
+
+                            if (size > 25) {
+                                size = 25;
+                            }
+                            data.push( createNode( 'n_age_' + result.metadata.age[ i ], size, size, '#2d2d2d', result.metadata.age[ i ] ) );
+                            data.push( createEdge( 'e_age_' + result.metadata.age[ i ], 'n_age', 'n_age_' + result.metadata.age[ i ] ) );
+
+
+
+                        }
+                    }
+                }
+            }
+            console.log( "RESULT: " + data );
+            if ( err ) res.send( err );
+            else res.send( data );
+        } );
+    } );
+
+    // ******* REF GRAPH 3 *******
+
+    router.get( '/api/data/graph/ref/3/:_cog', function( req, res ) {
+        var data = [];
+        var cog_query = req.params._cog;
+        console.log( 'getting graph 3 with  with cog: ' + cog_query );
+
+        var meta = {
+            age: {
+                '0-10': 0,
+                '11-20': 0,
+                '21-30': 0,
+                '31-40': 0,
+                '41-50': 0,
+                '51-60': 0,
+                '>60': 0,
+            },
+            gender: {
+                male: 0,
+                female: 0,
+            },
+            bmi: {
+                underweight: 0,
+                normal: 0,
+                overweight: 0,
+                obese: 0
+            },
+            ibd: {
+                yes: 0,
+                no: 0,
+            },
+            nationality: {
+                denmark: 0,
+                spain: 0,
+            }
+        };
+
+
+        var temp = '';
+        var people = [];
+
+        Person.find( {}, function( err, results ) {
+            if ( err ) res.send( err );
+
+            for ( var i = 0; i < results.length; i++ ) {
+                people[ results[ i ].id ] = results[ i ];
+            }
+
+            Genome.find( {
+                "cog_ref": new RegExp( cog_query )
+            }, function( err, results ) {
+                if ( err ) res.send( err );
+                //console.log('SIZE: '+results.length );
+                //console.log('QUERY'+cog_query);
+                for ( var i = 0; i < results.length; i++ ) {
+                    // added this line to filter out all the results that are UNMAPPED, V1, or O2.
+                    if ( ( results[ i ].person_id != 'unmapped' ) && ( results[ i ].person_id != 'V1' ) && ( results[ i ].person_id != 'O2' ) ) {
+                        // adjust all the metadata for this person here!!!!!!
+                        var person = people[ results[ i ].person_id ];
+                        //console.log("PERSON: "+person);
+                        //AGE
+                        if ( person[ 'age' ] <= 10 ) {
+                            meta.age[ '0-10' ]++
+                        }
+                        else if ( person[ 'age' ] <= 20 ) {
+                            meta.age[ '11-20' ]++
+                        }
+                        else if ( person[ 'age' ] <= 30 ) {
+                            meta.age[ '21-30' ]++
+                        }
+                        else if ( person[ 'age' ] <= 40 ) {
+                            meta.age[ '31-40' ]++
+                        }
+                        else if ( person[ 'age' ] <= 50 ) {
+                            meta.age[ '41-50' ]++
+                        }
+                        else if ( person[ 'age' ] <= 60 ) {
+                            meta.age[ '51-60' ]++
+                        }
+                        else {
+                            meta.age[ '>60' ]++
+                        };
+
+                        //gender
+                        if ( person[ 'gender' ] == 'male' ) {
+                            meta.gender[ 'male' ]++
+                        }
+                        else {
+                            meta.gender[ 'female' ]++
+                        }
+                        //bmi
+                        if ( person[ 'bmi' ] < 18.25 ) {
+                            meta.bmi[ 'underweight' ]++
+                        }
+                        else if ( person[ 'bmi' ] <= 25 ) {
+                            meta.bmi[ 'normal' ]++
+                        }
+                        else if ( person[ 'bmi' ] <= 30 ) {
+                            meta.bmi[ 'overweight' ]++
+                        }
+                        else {
+                            meta.bmi[ 'obese' ]++
+                        }
+
+                        //ibd
+                        if ( person[ 'ibd' ] == 'yes' ) {
+                            meta.ibd[ 'yes' ]++
+                        }
+                        else {
+                            meta.ibd[ 'no' ]++
+                        }
+                        //nationality
+                        if ( person[ 'nationality' ] == 'spain' ) {
+                            meta.nationality[ 'spain' ]++
+                        }
+                        else {
+                            meta.nationality[ 'denmark' ]++
+                        }
+                    }
+                }
+
+                // BASE NODE
+                data.push( createNode( cog_query, 20, 20, '#ff0000' ) );
+
+                // CATEGORY NODES
+                for ( var cat in meta ) {
+                    data.push( createNode( cat, 5, 5, '#00ff00' ) );
+                    data.push( createEdge( cog_query + "" + cat, cog_query, cat, "" ) );
+                    //PROPERTY NODES
+                    for ( var property in meta[ cat ] ) {
+                        data.push( createNode( property, meta[ cat ][ property ], meta[ cat ][ property ], '#00ff00' ) );
+                        data.push( createEdge( cat + "-" + property, cat, property, "" ) );
+                    }
+                };
+                res.send( data );
+            } ); //end find
+
+        } );
+
+    } );
+
 
     router.get( '/api/data/graph/seq/:_sequence', function( req, res ) {
 
@@ -236,10 +414,8 @@
                         'location': new RegExp( root_genome[ 0 ].similar_scaffolds[ i ].location + ".*", "i" ), // ignore the :+ or - at the end of locators
 
                     }, function( err, genome ) {
-                        // finally, if a gene is found... create a push a new node to the dataset
                         if ( err ) console.log( err );
                         if ( genome ) {
-                            //console.log("RESULTTTT---" + result);
                             var name = "COG Ref: " + genome.cog_ref + "\nKEGG Ref: " + genome.kegg_ref;
                             data_nodes.push( createNode( genome._id, 5, 5, '#2d2d2d', name ) );
                             data_nodes.push( createEdge( genome._id + ':edge', search_id, genome._id, "similar" ) );
@@ -296,187 +472,7 @@
         res.send( data );
     } );
 
-    // ******* REF GRAPH 2 *******
 
-    router.get( '/api/data/graph/ref/2/:_cog', function( req, res ) {
-        var data = [];
-        var cog_query = req.params._cog;
-        console.log( 'getting graph 2 with  with cog: ' + cog_query );
-
-        var people = {};
-        var temp = '';
-        Person.find( {}, function( err, results ) {
-            if ( err ) res.send( err );
-            for ( var i = 0; i < results.length; i++ ) {
-                // added this line to filter out all the results that are UNMAPPED, V1, or O2.
-                if ( ( results[ i ].id != 'unmapped' ) || ( results[ i ].id != 'V1' ) || ( results[ i ].id != 'O2' ) ) {
-                    people[ results[ i ].id ] = 0;
-                }
-            }
-            // add the groups
-            // people['unmapped'] = 0;
-            // people['V1'] = 0;
-            // people['O2'] = 0;
-            //console.log("RESULT: " + people);
-
-            Genome.find( {
-                "cog_ref": new RegExp( cog_query )
-            }, function( err, results ) {
-
-                if ( err ) res.send( err );
-                for ( var i = 0; i < results.length; i++ ) {
-                    people[ results[ i ].person_id ]++;
-                }
-                data.push( createNode( cog_query, 50, 50, '#2d2d2d' ) );
-
-                for ( var p in people ) {
-                    data.push( createNode( p, people[ p ], people[ p ], '#2d2d2d' ) );
-                }
-                res.send( data );
-            } );
-        } );
-    } );
-
-    // ******* REF GRAPH 3 *******
-
-    router.get( '/api/data/graph/ref/3/:_cog', function( req, res ) {
-        var data = [];
-        var cog_query = req.params._cog;
-        console.log( 'getting graph 3 with  with cog: ' + cog_query );
-
-        var meta = {
-            age: {
-                '0-10': 0,
-                '11-20': 0,
-                '21-30': 0,
-                '31-40': 0,
-                '41-50': 0,
-                '51-60': 0,
-                '>60': 0,
-            },
-            gender: {
-                male: 0,
-                female: 0,
-            },
-            bmi: {
-                underweight: 0,
-                normal: 0,
-                overweight: 0,
-                obese: 0
-            },
-            ibd: {
-                yes: 0,
-                no: 0,
-            },
-            nationality: {
-                denmark: 0,
-                spain: 0,
-            }
-        };
-
-
-        var temp = '';
-        var people = [];
-
-        Person.find( {}, function( err, results ) {
-            if ( err ) res.send( err );
-
-            for ( var i = 0; i < results.length; i++ ) {
-                people[ results[ i ].id ] = results[ i ];
-            }
-
-            Genome.find( {
-                "cog_ref": new RegExp( cog_query )
-            }, function( err, results ) {
-                if ( err ) res.send( err );
-                //console.log('SIZE: '+results.length );
-                //console.log('QUERY'+cog_query);
-                for ( var i = 0; i < results.length; i++ ) {
-                    // added this line to filter out all the results that are UNMAPPED, V1, or O2.
-                    if ( ( results[ i ].person_id != 'unmapped' ) && ( results[ i ].person_id != 'V1' ) && ( results[ i ].person_id != 'O2' ) ) {
-                        // adjust all the metadata for this person here!!!!!!
-                        var person = people[ results[ i ].person_id ];
-                        //console.log("PERSON: "+person);
-                        //AGE
-                        if ( person[ 'age' ] <= 10 ) {
-                            meta.age[ '0-10' ]++
-                        }
-                        else if ( person[ 'age' ] <= 20 ) {
-                            meta.age[ '11-20' ]++
-                        }
-                        else if ( person[ 'age' ] <= 30 ) {
-                            meta.age[ '21-30' ]++
-                        }
-                        else if ( person[ 'age' ] <= 40 ) {
-                            meta.age[ '31-40' ]++
-                        }
-                        else if ( person[ 'age' ] <= 50 ) {
-                            meta.age[ '41-50' ]++
-                        }
-                        else if ( person[ 'age' ] <= 60 ) {
-                            meta.age[ '51-60' ]++
-                        }
-                        else {
-                            meta.age[ '>60' ]++
-                        };
-
-                        //gender
-                        if ( person[ 'gender' ] == 'male' ) {
-                            meta.gender[ 'male' ]++
-                        }
-                        else {
-                            meta.gender[ 'female' ]++
-                        }
-                        //bmi
-                        if ( person[ 'bmi' ] < 18.25 ) {
-                            meta.bmi[ 'underweight' ]++
-                        }
-                        else if ( person[ 'bmi' ] <= 25 ) {
-                            meta.bmi[ 'normal' ]++
-                        }
-                        else if ( person[ 'bmi' ] <= 30 ) {
-                            meta.bmi[ 'overweight' ]++
-                        }
-                        else {
-                            meta.bmi[ 'obese' ]++
-                        }
-
-                        //ibd
-                        if ( person[ 'ibd' ] == 'yes' ) {
-                            meta.ibd[ 'yes' ]++
-                        }
-                        else {
-                            meta.ibd[ 'no' ]++
-                        }
-                        //nationality
-                        if ( person[ 'nationality' ] == 'spain' ) {
-                            meta.nationality[ 'spain' ]++
-                        }
-                        else {
-                            meta.nationality[ 'denmark' ]++
-                        }
-                    }
-                }
-
-                // BASE NODE
-                data.push( createNode( cog_query, 20, 20, '#ff0000' ) );
-
-                // CATEGORY NODES
-                for ( var cat in meta ) {
-                    data.push( createNode( cat, 5, 5, '#00ff00' ) );
-                    data.push( createEdge( cog_query + "" + cat, cog_query, cat, "" ) );
-                    //PROPERTY NODES
-                    for ( var property in meta[ cat ] ) {
-                        data.push( createNode( property, meta[ cat ][ property ], meta[ cat ][ property ], '#00ff00' ) );
-                        data.push( createEdge( cat + "-" + property, cat, property, "" ) );
-                    }
-                };
-                res.send( data );
-            } ); //end find
-
-        } );
-
-    } );
 
 
     // gets some test nodes for graph setup
@@ -505,8 +501,8 @@
 
             },
             style: {
-                width: 15,
-                height: 15,
+                width: width,
+                height: height,
                 'background-color': colour,
                 'label': label,
                 'font-size': 10,
