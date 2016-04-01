@@ -14,6 +14,17 @@
 
 
     const NODE_SIZE = 10;
+    const MAX_NODE_SIZE = 25;
+    const MIN_NODE_SIZE = 1;
+
+    const GREEN = '#00FF00';
+    const RED = '#FF0000';
+    const BLUE = '#0000FF';
+    const LBLUE = '#00FFFF';
+    const BLACK = '#000000';
+    const GREY = '#808080';
+    const YELLOW = '#FFFF00';
+    const WHITE = '#FFFFFF';
 
 
 
@@ -60,27 +71,25 @@
     router.get( '/api/data/graph/ref/1/:_cog', function( req, res ) {
         var data = [];
         var cog_query = req.params._cog;
+        var count;
+        var size;
 
         console.log( 'getting ref graph with cog: ' + cog_query );
 
         Cog.findOne( {
             "cog_id": new RegExp( req.params._cog )
         }, function( err, result ) {
-            console.log( 'RES' + result );
             if ( result ) {
 
-                data.push( createNode( cog_query, NODE_SIZE, NODE_SIZE, '#2d2d2d', cog_query ) );
+                data.push( createNode( cog_query, NODE_SIZE, NODE_SIZE, RED, cog_query ) );
 
-                data.push( createEdge( 'e_dist', cog_query, 'n_dist', 'Cohort Distribution' ) );
-                data.push( createNode( 'n_dist', NODE_SIZE, NODE_SIZE, '#2d2d2d', 'Distribution' ) );
                 for ( var i = 0; i < result.sampled_from.length; i++ ) {
-                    var size = result.sampled_from[ i ].count;
-                    if ( size > 25 ) {
-                        size = 25;
-                    }
+                    count = result.sampled_from[ i ].count;
+                    size = resolveSize(count);
+
                     if ( size > 0 ) {
-                        data.push( createNode( 'n_dist_' + result.sampled_from[ i ].id, size, size, '#2d2d2d', result.sampled_from[ i ].id ) );
-                        data.push( createEdge( 'e_dist_' + result.sampled_from[ i ].id, 'n_dist', 'n_dist_' + result.sampled_from[ i ].id, size + ' occurrences' ) );
+                        data.push( createNode( 'n_dist_' + result.sampled_from[ i ].id, size, size, GREEN, result.sampled_from[ i ].id ) );
+                        data.push( createEdge( 'e_dist_' + result.sampled_from[ i ].id, cog_query, 'n_dist_' + result.sampled_from[ i ].id, count + ' occurrences' ) );
                     }
                 }
             }
@@ -96,7 +105,13 @@
     router.get( '/api/data/graph/ref/2/:_cog', function( req, res ) {
         var data = [];
         var cog_query = req.params._cog;
-
+        const CAT_NODE = GREY;
+        const GRP_AGE = RED;
+        const GRP_GENDER = BLUE;
+        const GRP_BMI = YELLOW;
+        const GRP_IBD = LBLUE;
+        var size;
+        var count;
 
         console.log( 'getting metadata graph with cog: ' + cog_query );
 
@@ -105,258 +120,99 @@
         }, function( err, result ) {
             //console.log('RES'+result);
             if ( result ) {
-                data.push( createNode( cog_query, NODE_SIZE, NODE_SIZE, '#2d2d2d', cog_query ) );
-
+                data.push( createNode( cog_query, NODE_SIZE, NODE_SIZE, BLACK, cog_query ) );
 
                 // create nodes for metadata.age
+
                 data.push( createEdge( 'e_age', cog_query, 'n_age', 'Distribution over age' ) );
-                data.push( createNode( 'n_age', NODE_SIZE, NODE_SIZE, '#2d2d2d', 'Age' ) );
+                data.push( createNode( 'n_age', NODE_SIZE, NODE_SIZE, CAT_NODE, 'Age' ) );
                 var keys = [ '0-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-80', '>80' ];
                 for ( var key in keys ) {
                     var target = result.metadata.age[ keys[ key ] ];
                     var age_range = keys[ key ];
 
-                    var size = target.count;
-                    if ( size > 25 ) {
-                        size = 25;
-                    }
+                    count = target.count;
+                    size = resolveSize(count);
+
                     if ( size > 0 ) {
-                        data.push( createNode( 'n_age_' + age_range, size, size, '#2d2d2d', age_range ) );
+                        data.push( createNode( 'n_age_' + age_range, size, size, GRP_AGE, age_range ) );
                         data.push( createEdge( 'e_age_' + age_range, 'n_age', 'n_age_' + age_range, 'count: ' + count ) );
                     }
                 }
 
                 // create nodes for metadata.gender
                 data.push( createEdge( 'e_gender', cog_query, 'n_gender', 'Distribution over gender' ) );
-                data.push( createNode( 'n_gender', NODE_SIZE, NODE_SIZE, '#2d2d2d', 'Gender' ) );
+                data.push( createNode( 'n_gender', NODE_SIZE, NODE_SIZE, CAT_NODE, 'Gender' ) );
 
                 var target = result.metadata.gender;
                 //male
-                var size = target.male.count;
-                count = size;
-                if ( size > 25 ) {
-                    size = 25;
-                }
-                if (size == 0) {
-                    size = 1;
-                }
-                data.push( createNode( 'n_gender_male', size, size, '#2d2d2d', 'Male' ) );
+                count = target.male.count;
+                size = resolveSize(count);
+
+                data.push( createNode( 'n_gender_male', size, size, GRP_GENDER, 'Male' ) );
                 data.push( createEdge( 'e_gender_male', 'n_gender', 'n_gender_male', 'count: ' + count ) );
                 //female
-                var size = target.female.count;
-                count = size;
-                if ( size > 25 ) {
-                    size = 25;
-                }
-                if (size == 0) {
-                    size = 1;
-                }
-                data.push( createNode( 'n_gender_female', size, size, '#2d2d2d', 'Female' ) );
+                count = target.female.count;
+                size = resolveSize(count);
+
+                data.push( createNode( 'n_gender_female', size, size, GRP_GENDER, 'Female' ) );
                 data.push( createEdge( 'e_gender_female', 'n_gender', 'n_gender_female', 'count: ' + count ) );
 
                 // create nodes for BMI
-                var group_colour =
                 data.push( createEdge( 'e_bmi', cog_query, 'n_bmi', 'Distribution over BMI' ) );
-                data.push( createNode( 'n_bmi', NODE_SIZE, NODE_SIZE, '#2d2d2d', 'BMI' ) );
+                data.push( createNode( 'n_bmi', NODE_SIZE, NODE_SIZE, CAT_NODE, 'BMI' ) );
                 var keys = [ 'underweight', 'normal', 'overweight', 'obese'];
                 for ( var key in keys ) {
                     var target = result.metadata.bmi[ keys[ key ] ];
                     var bmi_range = keys[ key ];
 
-                    var count = target.count;
-                    count = size;
-                    if ( size > 25 ) {
-                        size = 25;
-                    }
-                    if (size == 0) {
-                        size = 1;
-                    }
+                    count = target.count;
+                    size = resolveSize(count);
+
                     //if ( size > 0 ) {
-                        data.push( createNode( 'n_bmi_' + bmi_range, size, size, '#2d2d2d', bmi_range ) );
+                        data.push( createNode( 'n_bmi_' + bmi_range, size, size, GRP_BMI, bmi_range ) );
                         data.push( createEdge( 'e_bmi_' + bmi_range, 'n_bmi', 'n_bmi_' + bmi_range, 'count: ' + count ) );
                     //}
                 }
 
                 //create nodes for ibd
                 data.push( createEdge( 'e_ibd', cog_query, 'n_ibd', 'Distribution over IDB' ) );
-                data.push( createNode( 'n_ibd', NODE_SIZE, NODE_SIZE, '#2d2d2d', 'IBD' ) );
+                data.push( createNode( 'n_ibd', NODE_SIZE, NODE_SIZE, CAT_NODE, 'IBD' ) );
 
                 var target = result.metadata.ibd;
                 //male
-                var count = target.yes.count;
+                count = target.yes.count;
                 size = resolveSize(count);
 
-                data.push( createNode( 'n_ibd_yes', size, size, '#2d2d2d', 'Yes' ) );
+                data.push( createNode( 'n_ibd_yes', size, size, GRP_IBD, 'Yes' ) );
                 data.push( createEdge( 'e_ibd_yes', 'n_ibd', 'n_ibd_yes', 'count: ' + count ) );
                 //female
 
                 count = target.no.count;
                 size = resolveSize(count);
-                data.push( createNode( 'n_ibd_no', size, size, '#2d2d2d', 'No' ) );
+                data.push( createNode( 'n_ibd_no', size, size, GRP_IBD, 'No' ) );
                 data.push( createEdge( 'e_ibd_no', 'n_ibd', 'n_ibd_no', 'count: ' + count ) );
-
-
-
             }
-            //console.log( "RESULT: " + data );
             if ( err ) res.send( err );
             else res.send( data );
         } );
     } );
 
+    // takes a int and clamps it between and min and a max, avoids common nodes from
+    // becoming too large and stops low count nodes from becoming too small.
     function resolveSize(size){
-        var new_size;
-        if ( size > 25 ) {
-            size = 25;
+        var new_size = size;
+        if ( size > MAX_NODE_SIZE ) {
+            new_size = MAX_NODE_SIZE;
         }
-        if (size == 0) {
-            size = 1;
+        if (size < MIN_NODE_SIZE) {
+            new_size = MIN_NODE_SIZE;
         }
         return new_size;
 
     }
-    // ******* REF GRAPH 3 *******
 
-    router.get( '/api/data/graph/ref/3/:_cog', function( req, res ) {
-        var data = [];
-        var cog_query = req.params._cog;
-        console.log( 'getting graph 3 with  with cog: ' + cog_query );
-
-        var meta = {
-            age: {
-                '0-10': 0,
-                '11-20': 0,
-                '21-30': 0,
-                '31-40': 0,
-                '41-50': 0,
-                '51-60': 0,
-                '>60': 0,
-            },
-            gender: {
-                male: 0,
-                female: 0,
-            },
-            bmi: {
-                underweight: 0,
-                normal: 0,
-                overweight: 0,
-                obese: 0
-            },
-            ibd: {
-                yes: 0,
-                no: 0,
-            },
-            nationality: {
-                denmark: 0,
-                spain: 0,
-            }
-        };
-
-
-        var temp = '';
-        var people = [];
-
-        Person.find( {}, function( err, results ) {
-            if ( err ) res.send( err );
-
-            for ( var i = 0; i < results.length; i++ ) {
-                people[ results[ i ].id ] = results[ i ];
-            }
-
-            Genome.find( {
-                "cog_ref": new RegExp( cog_query )
-            }, function( err, results ) {
-                if ( err ) res.send( err );
-                //console.log('SIZE: '+results.length );
-                //console.log('QUERY'+cog_query);
-                for ( var i = 0; i < results.length; i++ ) {
-                    // added this line to filter out all the results that are UNMAPPED, V1, or O2.
-                    if ( ( results[ i ].person_id != 'unmapped' ) && ( results[ i ].person_id != 'V1' ) && ( results[ i ].person_id != 'O2' ) ) {
-                        // adjust all the metadata for this person here!!!!!!
-                        var person = people[ results[ i ].person_id ];
-                        //console.log("PERSON: "+person);
-                        //AGE
-                        if ( person[ 'age' ] <= 10 ) {
-                            meta.age[ '0-10' ]++
-                        }
-                        else if ( person[ 'age' ] <= 20 ) {
-                            meta.age[ '11-20' ]++
-                        }
-                        else if ( person[ 'age' ] <= 30 ) {
-                            meta.age[ '21-30' ]++
-                        }
-                        else if ( person[ 'age' ] <= 40 ) {
-                            meta.age[ '31-40' ]++
-                        }
-                        else if ( person[ 'age' ] <= 50 ) {
-                            meta.age[ '41-50' ]++
-                        }
-                        else if ( person[ 'age' ] <= 60 ) {
-                            meta.age[ '51-60' ]++
-                        }
-                        else {
-                            meta.age[ '>60' ]++
-                        };
-
-                        //gender
-                        if ( person[ 'gender' ] == 'male' ) {
-                            meta.gender[ 'male' ]++
-                        }
-                        else {
-                            meta.gender[ 'female' ]++
-                        }
-                        //bmi
-                        if ( person[ 'bmi' ] < 18.25 ) {
-                            meta.bmi[ 'underweight' ]++
-                        }
-                        else if ( person[ 'bmi' ] <= 25 ) {
-                            meta.bmi[ 'normal' ]++
-                        }
-                        else if ( person[ 'bmi' ] <= 30 ) {
-                            meta.bmi[ 'overweight' ]++
-                        }
-                        else {
-                            meta.bmi[ 'obese' ]++
-                        }
-
-                        //ibd
-                        if ( person[ 'ibd' ] == 'yes' ) {
-                            meta.ibd[ 'yes' ]++
-                        }
-                        else {
-                            meta.ibd[ 'no' ]++
-                        }
-                        //nationality
-                        if ( person[ 'nationality' ] == 'spain' ) {
-                            meta.nationality[ 'spain' ]++
-                        }
-                        else {
-                            meta.nationality[ 'denmark' ]++
-                        }
-                    }
-                }
-
-                // BASE NODE
-                data.push( createNode( cog_query, 20, 20, '#ff0000' ) );
-
-                // CATEGORY NODES
-                for ( var cat in meta ) {
-                    data.push( createNode( cat, 5, 5, '#00ff00' ) );
-                    data.push( createEdge( cog_query + "" + cat, cog_query, cat, "" ) );
-                    //PROPERTY NODES
-                    for ( var property in meta[ cat ] ) {
-                        data.push( createNode( property, meta[ cat ][ property ], meta[ cat ][ property ], '#00ff00' ) );
-                        data.push( createEdge( cat + "-" + property, cat, property, "" ) );
-                    }
-                };
-                res.send( data );
-            } ); //end find
-
-        } );
-
-    } );
-
-
+     // SEQUENCE GRAPH
     router.get( '/api/data/graph/seq/:_sequence', function( req, res ) {
 
         var writePath = "/Users/geoffwhitehead/Google Drive/University/Dissertation/network_project/server/blast/query.fa";
@@ -482,6 +338,7 @@
         } );
     } );
 
+    // EXPAND SEQUENCE GRAPH
     router.get( '/api/data/graph/seq/expand/:_id', function( req, res ) {
         // find the genome with the id passed as a parameter
         var search_id = req.params._id;
@@ -597,136 +454,6 @@
         }
     }
 
-    // router.get('/api/data/test', function(req, res)
-    // {
-    //     console.log('sending some test');
-    //     var data = "test";
-    // });
-
-    // router.get('/api/data/studies', function(req, res)
-    // {
-    //     console.log('sending some data');
-    //     var data = [
-    //     {
-    //         id: 1,
-    //         name: "some study here",
-    //         info: "some info about the study here",
-    //         size: "100",
-    //
-    //     },
-    //     {
-    //         id: 2,
-    //         name: "another study here",
-    //         info: "some info about the study here",
-    //         size: "50",
-    //     }];
-    //     res.status(200).json(data);
-    // });
-
-    // router.get('/api/data/studies/:_studyId/genes', function(req, res)
-    // {
-    //     console.log('sending some data');
-    //
-    //     Genome.find(
-    //     {}, function(err, data)
-    //     {
-    //         if (err) res.send(err);
-    //         else res.send(data);
-    //     });
-    // });
-
-    // router.get('/api/data/studies/:_studyId/genes/:_geneId', function(req, res)
-    // {
-    //     console.log('sending some data');
-    //
-    //     Genome.findOne(
-    //         req.params._geneId,
-    //         function(err, data)
-    //         {
-    //             if (err) res.send(err);
-    //             else res.send(data);
-    //         });
-    // });
-
-    // router.post('/api/data/studies/:_studyId/genes', function(req, res)
-    // {
-    //     console.log('posting some data');
-    //     var gene = new Genome(req.body);
-    //     gene.save(function(err, data)
-    //     {
-    //         if (err) res.send(err);
-    //         else res.json(
-    //         {
-    //             message: 'success',
-    //             data: data
-    //         });
-    //     });
-    // });
-
-    // router.delete('/api/data/studies/:_studyId/genes', function(req, res)
-    // {
-    //     console.log('deleting some data');
-    //     gene.remove(function(err, data)
-    //     {
-    //         if (err) res.send(err);
-    //         else res.json(
-    //         {
-    //             message: 'success',
-    //             data: data
-    //         });
-    //     });
-    // });
-
-    // router.get('/api/data/studies/:_studyId/genes/:_geneId/relationships', function(req, res)
-    // {
-    //     console.log('sending some data');
-    //     var data = [
-    //     {
-    //         name: "occurence in elderly",
-    //         description: "bla bla  bla",
-    //     },
-    //     {
-    //         name: "occurence in healthy vs unhealthy individuals",
-    //         description: "bla bla  bla",
-    //     },
-    //     {
-    //         name: "placement in phylogenetic tree of life",
-    //         description: "bla bla  bla",
-    //     }];
-    //     res.status(200).json(data);
-    // });
-
-
-
-    // router.get('/api/data/read', function(req, res)
-    // {
-    //     console.log('reading some data');
-    //     var fs = require('fs');
-    //     fs.readFile(path.join(__dirname, '../data/test.txt'), function(err, data)
-    //     {
-    //         if (err) console.log(err);
-    //         // if (data) console.log(data);
-    //         var array = data.toString().split("\n");
-    //         array.forEach(function(i)
-    //         {
-    //             console.log(i + ".");
-    //         });
-    //         res.send(data);
-    //     });
-    // });
-
-
-    /*
-
-      router.get('/api/genes/:_id', function(req, res) {
-        db.genes.get({
-          _id: mongojs.ObjectId(req.params._id)
-        }, '', function(err, data) {
-          res.json(data);∫
-        });
-
-      });
-    */
     module.exports = router;
 
 }() );
