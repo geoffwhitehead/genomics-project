@@ -23,6 +23,7 @@ var counter = 0;
 var counter_temp = 0;
 var stream;
 const END_OF_COHORT = 9;
+
 run();
 
 function clear() {
@@ -42,10 +43,7 @@ function startStream() {
                 " : processed: " + processed +
                 " : cogs eval: " + cogs_evaluated +
                 " : unidentied cogs: " + unidentied );
-
-
             counter_temp = 0;
-
         }
         count++;
         counter = 0; // reset the counter for each genome
@@ -107,6 +105,7 @@ function getBMI( bmi ) {
     }
     return key;
 }
+
 var initCog = function( cog ) {
     for ( var i = 0; i < people_array.length; i++ ) {
         if ( ( people_array[ i ].id ).replace( /\D/g, '' ) <= END_OF_COHORT ) {

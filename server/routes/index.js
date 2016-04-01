@@ -7,6 +7,7 @@
     var Genome = require( '../models/genome.js' );
     var Person = require( '../models/person.js' );
     var Cog = require( '../models/cog.js' );
+    var Ref = require( '../models/ref.js' );
     var bodyParser = require( 'body-parser' );
     var _ = require( 'underscore' );
     var db = 'mongodb://localhost/gene_project';
@@ -14,9 +15,10 @@
 
 
     const NODE_SIZE = 10;
-    const MAX_NODE_SIZE = 25;
+    const MAX_NODE_SIZE = 75;
     const MIN_NODE_SIZE = 1;
 
+    const SCALING_FACTOR = 8;
     const GREEN = '#00FF00';
     const RED = '#FF0000';
     const BLUE = '#0000FF';
@@ -85,7 +87,7 @@
 
                 for ( var i = 0; i < result.sampled_from.length; i++ ) {
                     count = result.sampled_from[ i ].count;
-                    size = resolveSize(count);
+                    size = resolveSize( count );
 
                     if ( size > 0 ) {
                         data.push( createNode( 'n_dist_' + result.sampled_from[ i ].id, size, size, GREEN, result.sampled_from[ i ].id ) );
@@ -132,7 +134,7 @@
                     var age_range = keys[ key ];
 
                     count = target.count;
-                    size = resolveSize(count);
+                    size = resolveSize( count );
 
                     if ( size > 0 ) {
                         data.push( createNode( 'n_age_' + age_range, size, size, GRP_AGE, age_range ) );
@@ -147,13 +149,13 @@
                 var target = result.metadata.gender;
                 //male
                 count = target.male.count;
-                size = resolveSize(count);
+                size = resolveSize( count );
 
                 data.push( createNode( 'n_gender_male', size, size, GRP_GENDER, 'Male' ) );
                 data.push( createEdge( 'e_gender_male', 'n_gender', 'n_gender_male', 'count: ' + count ) );
                 //female
                 count = target.female.count;
-                size = resolveSize(count);
+                size = resolveSize( count );
 
                 data.push( createNode( 'n_gender_female', size, size, GRP_GENDER, 'Female' ) );
                 data.push( createEdge( 'e_gender_female', 'n_gender', 'n_gender_female', 'count: ' + count ) );
@@ -161,17 +163,17 @@
                 // create nodes for BMI
                 data.push( createEdge( 'e_bmi', cog_query, 'n_bmi', 'Distribution over BMI' ) );
                 data.push( createNode( 'n_bmi', NODE_SIZE, NODE_SIZE, CAT_NODE, 'BMI' ) );
-                var keys = [ 'underweight', 'normal', 'overweight', 'obese'];
+                var keys = [ 'underweight', 'normal', 'overweight', 'obese' ];
                 for ( var key in keys ) {
                     var target = result.metadata.bmi[ keys[ key ] ];
                     var bmi_range = keys[ key ];
 
                     count = target.count;
-                    size = resolveSize(count);
+                    size = resolveSize( count );
 
                     //if ( size > 0 ) {
-                        data.push( createNode( 'n_bmi_' + bmi_range, size, size, GRP_BMI, bmi_range ) );
-                        data.push( createEdge( 'e_bmi_' + bmi_range, 'n_bmi', 'n_bmi_' + bmi_range, 'count: ' + count ) );
+                    data.push( createNode( 'n_bmi_' + bmi_range, size, size, GRP_BMI, bmi_range ) );
+                    data.push( createEdge( 'e_bmi_' + bmi_range, 'n_bmi', 'n_bmi_' + bmi_range, 'count: ' + count ) );
                     //}
                 }
 
@@ -182,14 +184,14 @@
                 var target = result.metadata.ibd;
                 //male
                 count = target.yes.count;
-                size = resolveSize(count);
+                size = resolveSize( count );
 
                 data.push( createNode( 'n_ibd_yes', size, size, GRP_IBD, 'Yes' ) );
                 data.push( createEdge( 'e_ibd_yes', 'n_ibd', 'n_ibd_yes', 'count: ' + count ) );
                 //female
 
                 count = target.no.count;
-                size = resolveSize(count);
+                size = resolveSize( count );
                 data.push( createNode( 'n_ibd_no', size, size, GRP_IBD, 'No' ) );
                 data.push( createEdge( 'e_ibd_no', 'n_ibd', 'n_ibd_no', 'count: ' + count ) );
             }
@@ -198,21 +200,142 @@
         } );
     } );
 
+
+
+    // ******* REF GRAPH 3 - relative metadata using weightings *******
+    // currently very similar to graph 2.
+    // TODO: either keep as seperate function if more changes are to be made or
+    // merge into single function for graph 2 and 3.
+    router.get( '/api/data/graph/ref/3/:_cog', function( req, res ) {
+        var data = [];
+        var cog_query = req.params._cog;
+        const CAT_NODE = GREY;
+        const GRP_AGE = RED;
+        const GRP_GENDER = BLUE;
+        const GRP_BMI = YELLOW;
+        const GRP_IBD = LBLUE;
+        var size;
+        var count;
+        var reference_weight;
+
+        console.log( 'getting metadata graph with cog: ' + cog_query );
+        // pull the reference from the database that contains the group weightings
+
+
+        Ref.findOne( {}, function( err, ref ) {
+
+            Cog.findOne( {
+                "cog_id": new RegExp( req.params._cog )
+            }, function( err, result ) {
+
+                if ( result ) {
+                    data.push( createNode( cog_query, NODE_SIZE, NODE_SIZE, BLACK, cog_query ) );
+
+                    // create nodes for metadata.age
+
+                    data.push( createEdge( 'e_age', cog_query, 'n_age', 'Distribution over age' ) );
+                    data.push( createNode( 'n_age', NODE_SIZE, NODE_SIZE, CAT_NODE, 'Age' ) );
+
+                    // create the keys for the age ranges and iterate over them creating nodes and edges
+                    var keys = [ '0-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-80', '>80' ];
+                    for ( var key in keys ) {
+                        var target = result.metadata.age[ keys[ key ] ];
+                        var age_range = keys[ key ];
+
+
+                        count = (target.count * ref.age[ keys[ key ] ].weight).toFixed(2);
+                        size = resolveSize( count * SCALING_FACTOR );
+
+                        if ( size > 0 ) {
+                            data.push( createNode( 'n_age_' + age_range, size, size, GRP_AGE, age_range ) );
+                            data.push( createEdge( 'e_age_' + age_range, 'n_age', 'n_age_' + age_range, 'Score: ' + count ) );
+                        }
+                    }
+
+                    // create nodes for metadata.gender
+                    data.push( createEdge( 'e_gender', cog_query, 'n_gender', 'Distribution over gender' ) );
+                    data.push( createNode( 'n_gender', NODE_SIZE, NODE_SIZE, CAT_NODE, 'Gender' ) );
+
+                    var target = result.metadata.gender;
+                    //male
+
+                    count = (target.male.count * ref.gender.male.weight).toFixed(2);
+                    size = resolveSize( count * SCALING_FACTOR);
+
+                    data.push( createNode( 'n_gender_male', size, size, GRP_GENDER, 'Male' ) );
+                    data.push( createEdge( 'e_gender_male', 'n_gender', 'n_gender_male', 'Score: ' + count ) );
+
+
+                    //female
+                    count = (target.female.count * ref.gender.female.weight).toFixed(2);
+                    size = resolveSize( count * SCALING_FACTOR );
+
+                    data.push( createNode( 'n_gender_female', size, size, GRP_GENDER, 'Female' ) );
+                    data.push( createEdge( 'e_gender_female', 'n_gender', 'n_gender_female', 'Score: ' + count ) );
+
+                    // create nodes for BMI
+                    data.push( createEdge( 'e_bmi', cog_query, 'n_bmi', 'Distribution over BMI' ) );
+                    data.push( createNode( 'n_bmi', NODE_SIZE, NODE_SIZE, CAT_NODE, 'BMI' ) );
+                    var keys = [ 'underweight', 'normal', 'overweight', 'obese' ];
+                    for ( var key in keys ) {
+                        var target = result.metadata.bmi[ keys[ key ] ];
+                        var bmi_range = keys[ key ];
+
+                        count = (target.count * ref.bmi[ keys[ key ] ].weight).toFixed(2);
+
+                        size = resolveSize( count * SCALING_FACTOR );
+
+                        //if ( size > 0 ) {
+                        data.push( createNode( 'n_bmi_' + bmi_range, size, size, GRP_BMI, bmi_range ) );
+                        data.push( createEdge( 'e_bmi_' + bmi_range, 'n_bmi', 'n_bmi_' + bmi_range, 'Score: ' + count ) );
+                        //}
+                    }
+
+                    //create nodes for ibd
+                    data.push( createEdge( 'e_ibd', cog_query, 'n_ibd', 'Distribution over IDB' ) );
+                    data.push( createNode( 'n_ibd', NODE_SIZE, NODE_SIZE, CAT_NODE, 'IBD' ) );
+
+                    var target = result.metadata.ibd;
+
+
+                    //yes
+                    count = (target.yes.count * ref.ibd.yes.weight).toFixed(2);
+                    size = resolveSize( count * SCALING_FACTOR );
+
+                    data.push( createNode( 'n_ibd_yes', size, size, GRP_IBD, 'Yes' ) );
+                    data.push( createEdge( 'e_ibd_yes', 'n_ibd', 'n_ibd_yes', 'Score: ' + count ) );
+
+                    // no
+                    count = (target.no.count * ref.ibd.no.weight).toFixed(2);
+                    size = resolveSize( count * SCALING_FACTOR);
+
+                    data.push( createNode( 'n_ibd_no', size, size, GRP_IBD, 'No' ) );
+                    data.push( createEdge( 'e_ibd_no', 'n_ibd', 'n_ibd_no', 'Score: ' + count ) );
+                }
+                if ( err ) res.send( err );
+                else res.send( data );
+            } );
+        } );
+    } );
+
+
+
     // takes a int and clamps it between and min and a max, avoids common nodes from
     // becoming too large and stops low count nodes from becoming too small.
-    function resolveSize(size){
+    function resolveSize( size ) {
         var new_size = size;
         if ( size > MAX_NODE_SIZE ) {
             new_size = MAX_NODE_SIZE;
         }
-        if (size < MIN_NODE_SIZE) {
+        if ( size < MIN_NODE_SIZE ) {
             new_size = MIN_NODE_SIZE;
         }
         return new_size;
 
     }
 
-     // SEQUENCE GRAPH
+
+    // SEQUENCE GRAPH
     router.get( '/api/data/graph/seq/:_sequence', function( req, res ) {
 
         var writePath = "/Users/geoffwhitehead/Google Drive/University/Dissertation/network_project/server/blast/query.fa";
