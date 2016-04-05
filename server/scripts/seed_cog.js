@@ -60,6 +60,101 @@ function startStream() {
     } )
 }
 
+function updateGenome( genome ) {
+
+    if ( genome.cog_ref !== 'NA' ) {
+
+        // some genomes contain kegg and cog refs
+        var cogs = genome.cog_ref.toString().split( ';' );
+        for ( var i = 0; i < cogs.length; i++ ) {
+            updateCog( cogs[ i ], genome, cogs.length );
+
+
+        }
+        processed++; // gene has been processed
+    }
+    else {
+        unidentied++; // gene was unidentified
+        stream.resume();
+    }
+
+}
+
+
+function updateCog( id, genome, arr_size ) {
+
+
+    Cog.find( {
+        cog_id: id
+    }, function( err, result_cogs ) {
+        if ( err ) console.log( err );
+
+        var c;
+
+
+        if ( result_cogs.length > 1 ) {
+            console.log( 'ERROR : duplicate entry' );
+            exit( 1 );
+        }
+
+        // if this a new record, create a new cog, else use the cog returned
+        if ( result_cogs.length == 0 ) {
+            c = initCog( new Cog() );
+            c.cog_id = id;
+        }
+        else {
+            c = result_cogs[ 0 ];
+        }
+
+        // loop through all the similar scaffolds and record the metadata
+        for ( var i = 0; i < genome.similar_scaffolds.length; i++ ) {
+            // pull the record for the person associated to this genome
+            var person = findPerson( genome.similar_scaffolds[i].person_id );
+            var genome_code = genome.similar_scaffolds
+
+            c.sampled_from[ findPersonIndex( person.id, c ) ].count++;
+
+            var key = getAgeKey( person.age );
+            c.metadata.age[ key ].count++;
+            c.metadata.age[ key ].genomes.push( genome.code );
+
+            key = getBMI( person.bmi );
+            c.metadata.bmi[ key ].count++;
+            c.metadata.bmi[ key ].genomes.push( genome.code );
+
+            if ( person.gender == 'male' ) {
+                c.metadata.gender.male.count++;
+                c.metadata.gender.male.genomes.push( genome.code );
+            }
+            else {
+                c.metadata.gender.female.count++;
+                c.metadata.gender.female.genomes.push( genome.code );
+            }
+
+            if ( person.ibd == 'Y' ) {
+                c.metadata.ibd.yes.count++;
+                c.metadata.ibd.yes.genomes.push( genome.code );
+
+            }
+            else {
+                c.metadata.ibd.no.count++;
+                c.metadata.ibd.no.genomes.push( genome.code );
+            }
+        }
+
+        c.save( function( err ) {
+            if ( err ) console.log( err );
+            counter++;
+            cogs_evaluated++;
+            // resume the stream if this is the last COG
+            if ( counter == arr_size ) {
+                stream.resume();
+            }
+        } );
+    } );
+}
+
+
 function getAgeKey( age ) {
     key = '';
     if ( age < 11 ) {
@@ -126,95 +221,12 @@ function findPersonIndex( query_id, cog ) {
             return i;
         }
     }
-    console.log('ERROR: ' + 'person not found');
-    exit(1);
+    console.log( 'ERROR: ' + 'person not found' );
+    exit( 1 );
 }
 
 
-function updateCog( id, genome, arr_size ) {
 
-
-    Cog.find( {
-        cog_id: id
-    }, function( err, result_cogs ) {
-        if ( err ) console.log( err );
-        if ( result_cogs.length > 1 ) {
-            console.log( 'ERROR : duplicate entry' );
-            exit( 1 );
-        }
-
-        // pull the record for the person associated to this genome
-        var person = findPerson( genome.person_id );
-        var c;
-        // if this a new record, create a new cog, else use the cog returned
-        if ( result_cogs.length == 0 ) {
-            c = initCog( new Cog() );
-            c.cog_id = id;
-        }
-        else {
-            c = result_cogs[ 0 ];
-        }
-
-
-        c.sampled_from[ findPersonIndex( person.id, c ) ].count++;
-
-        var key = getAgeKey( person.age );
-        c.metadata.age[ key ].count++;
-        c.metadata.age[ key ].genomes.push( genome.code );
-
-        key = getBMI( person.bmi );
-        c.metadata.bmi[ key ].count++;
-        c.metadata.bmi[ key ].genomes.push( genome.code );
-
-        if ( person.gender == 'male' ) {
-            c.metadata.gender.male.count++;
-            c.metadata.gender.male.genomes.push( genome.code );
-        }
-        else {
-            c.metadata.gender.female.count++;
-            c.metadata.gender.female.genomes.push( genome.code );
-        }
-
-        if ( person.ibd == 'Y' ) {
-            c.metadata.ibd.yes.count++;
-            c.metadata.ibd.yes.genomes.push( genome.code );
-
-        }
-        else {
-            c.metadata.ibd.no.count++;
-            c.metadata.ibd.no.genomes.push( genome.code );
-        }
-
-        c.save( function( err ) {
-            if ( err ) console.log( err );
-            counter++;
-            cogs_evaluated++;
-            // resume the stream if this is the last COG
-            if ( counter == arr_size ) {
-                stream.resume();
-            }
-        } );
-    } );
-}
-
-
-function updateGenome( genome ) {
-
-    if ( genome.cog_ref !== 'NA' ) {
-
-        // some genomes contain kegg and cog refs
-        var cogs = genome.cog_ref.toString().split( ';' );
-        for ( var i = 0; i < cogs.length; i++ ) {
-            updateCog( cogs[ i ], genome, cogs.length );
-        }
-        processed++; // gene has been processed
-    }
-    else {
-        unidentied++; // gene was unidentified
-        stream.resume();
-    }
-
-}
 
 function run() {
     Person.find( {}, function( err, people ) {

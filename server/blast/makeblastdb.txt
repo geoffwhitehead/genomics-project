@@ -1,0 +1,1 @@
+makeblastdb -in /Users/geoffwhitehead/data/network_project/original/BGI_GeneSet20090523.fa -dbtype nucl -out /Users/geoffwhitehead/data/network_project/blastdb
