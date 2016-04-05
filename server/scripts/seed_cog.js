@@ -22,6 +22,7 @@ var processed = 0;
 var counter = 0;
 var counter_temp = 0;
 var stream;
+var similars = 0;
 const END_OF_COHORT = 9;
 
 run();
@@ -42,7 +43,8 @@ function startStream() {
             console.log( "count: " + count +
                 " : processed: " + processed +
                 " : cogs eval: " + cogs_evaluated +
-                " : unidentied cogs: " + unidentied );
+                " : unidentied cogs: " + unidentied +
+                " : occurences processed: " + similars);
             counter_temp = 0;
         }
         count++;
@@ -140,6 +142,7 @@ function updateCog( id, genome, arr_size ) {
                 c.metadata.ibd.no.count++;
                 c.metadata.ibd.no.genomes.push( genome.code );
             }
+            similars ++ ;
         }
 
         c.save( function( err ) {
