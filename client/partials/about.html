@@ -4,30 +4,44 @@
             <div class="panel-body">
                 <div>
                     <div class="jumbotron">
-                        <h1>Graphing Genomes</h1>
+                        <h1>Using Network Diagrams to Analyse Metagenomic Studies</h1>
                     </div>
 
                     <div class="row marketing">
                         <div class="col-lg-6">
-                            <h4>asda</h4>
-                            <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
+                            <h4>Project</h4>
+                            <p>Developed by Geoff Whitehead as part of a dissertation for a BSC in Computer Science.</p>
 
-                            <h4>Subheading</h4>
-                            <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
+                            <h4>Data</h4>
+                            <p>Data used for this project was from a study by Junjie Qin, Ruiqiang Li, Jeroen Raes, et al. A human gut microbial gene catalogue established by metagenomic sequencing. Full paper can be found <a href="http://www.nature.com/nature/journal/v464/n7285/full/nature08821.html">here</a></p>
 
-                            <h4>Subheading</h4>
-                            <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+                            <h4>Abstract</h4>
+                            <p>Microbes are responsible for most of the chemical reactions that take place on earth and are important in maintaining life on earth. However, we have little information on most of mainly due to our inability to culture them
+                                in a laboratory. Metagenomics provides an answer to this by allowing us to analyse the DNA directly from an environmental sample to understand the metagenomes role.</p>
+                            <p>Metagenomics studies contain substantial data about millions of genes. This data includes where the genes have been observed, in what numbers and under what context. However, due to the size and complexity of metagenomics datasets
+                                it can be difficult to use this data in single gene analyses.
+                            </p>
+                            <p>The project goal is to create a web based visualisation tool that will take a gene query and display a network visualisation that will represent that genes occurrence / relationship within the dataset. The purpose of
+                                this will be to investigate using computational analysis and visualisations in an attempt to discover any relationships between that exist between genomes.
+                            </p>
                         </div>
 
                         <div class="col-lg-6">
-                            <h4>Subheading</h4>
-                            <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
-
-                            <h4>Subheading</h4>
-                            <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
-
-                            <h4>Subheading</h4>
-                            <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+                            <h4>Instruction</h4>
+                            <p>There are 2 ways you can search through the genome database. The first is by using the reference search, the second is by using a sequence search.</p>
+                            <h4>Reference Search</h4>
+                            <p>This allows you to enter a COG reference and display any of the following graphs:</p>
+                            <ul>
+                                <li><strong>Cohort Distribution Graph: </strong> This will show how frequently the queried COG appeared in each of the people in the study.</li>
+                                <li><strong>Metadata Distribution Graph: </strong> This will display nodes for the the properties we hold on the cohort and show how frequently the queried COG appeared in the those properties</li>
+                                <li><strong>Relative Metadata Distribution Graph: </strong> This graph will show how frequently the COG appeared throughout the metadata we hold, but it will adjust the final score based on how common that property was. For
+                                    example, if a large percentage of the group are aged between 50-60, then this property would hold a lower weighting and any hits would score a lower value.</li>
+                            </ul>
+                            <h4>Sequence Search</h4>
+                            <p>This allows the user to enter a DNA chain. A blast analysis is then performed against the DNA chain and any close mathches are returned to the user and displayed as nodes on the graph. The BLAST data is also returned in tabular
+                                form. </p>
+                            <p>The user can then click on nodes (genomes) to view information about that genome. They can then perform further queries by clicking the search button. This will return all of thats genes similar genomes. The user can continue
+                                to traverse through the dataset in this manner.</p>
                         </div>
                     </div>
                 </div>

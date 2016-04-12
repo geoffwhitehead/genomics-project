@@ -1,46 +1,46 @@
+<script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.js">
+</script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.js"></script>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.0/jquery.qtip.min.css" rel="stylesheet" type="text/css" />
+<script src="/lib/cytoscape-cola/cytoscape-cola.js" type="text/javascript"></script>
+<script src="/js/graphs/basic.js" type="text/javascript"></script>
 
-    <div class="row col-md-12">
-        <div class="panel panel-default">
+<div class="row col-md-12">
+    <div class="panel panel-default">
 
-            <div class="panel-body">
-                <div>Test Scope: {{geneSearch}}</div>
-                <div>
-                    <p>use cog references to search for a gene in the dataset</p>
-                    <div class="row col-md-6">
-                        <input type="text" class="form-control input-lg" placeholder="Select a gene..." ng-model="geneSearch" ng-model-options='{ debounce: 1000}' ng-change="inputChanged()" ng-trim="true">
-                    </div>
+        <div class="panel-body">
 
-                    <div class="row col-md-6">
-                        <button ng-click="fetchGraphRef()">Fetch Graph 1</button>
-                        <button ng-click="fetchGraphRef2()">Fetch Graph 2</button>
-                        <button ng-click="fetchGraphRef3()">Fetch Graph 3</button>
-                    </div>
-                    <div class="row col-md-12">
-                        <br>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <tr>
-                                    <th>cog_ref</th>
-                                    <th>type</th>
-                                    <th>metadata</th>
-                                </tr>
-                                <tr class="clickable-row" ng-repeat="gene in genes | orderBy:sortBy:reverse">
-                                    <td>
-                                        {{gene.cog_ref}}
-                                    </td>
-                                    <td>
-                                        {{gene.type}}
-                                    </td>
-                                    <td>
-                                        {{gene.metadata}}
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
+            <div>
+                <p>use cog references to search for a gene in the dataset</p>
+                <div class="row col-md-6">
+                    <input type="text" class="form-control input-lg" placeholder="Select a gene..." ng-model="geneSearch" ng-model-options='{ debounce: 200}' ng-change="inputChanged()" ng-trim="true">
+                </div>
+
+                <div class="row col-md-6">
+                    <button ng-click="fetchGraphRef()">Fetch Cohort Distribution Graph</button>
+                    <button ng-click="fetchGraphRef2()">Fetch Distribution Graph</button>
+                    <button ng-click="fetchGraphRef3()">Fetch Relative Distribution Graph</button>
+                </div>
+                <div class="row col-md-12">
                     <br>
-                    <div class="row col-md-12" id="cy"></div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tr>
+                                <th>cog_ref</th>
+                            </tr>
+                            <tr class="clickable-row" ng-repeat="gene in genes | orderBy:sortBy:reverse">
+                                <td>
+                                    {{gene.cog_id}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <br>
+                <div class="row col-md-12">
+                    <div id="cy"></div>
                 </div>
             </div>
         </div>
     </div>
+</div>

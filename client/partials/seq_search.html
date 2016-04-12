@@ -1,53 +1,109 @@
-<html ng-app="mainApp" ng-controller="DataController">
-    <div class="row col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <div>
+<link href="/css/styles.css" rel="stylesheet" type="text/css">
+<link href="/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<script src="/lib/cytoscape-cola/jhgjh/cytoscape-cola.js" type="text/javascript"></script>
+<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+
+<!-- for testing with local version of cytoscape.js -->
+<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+
+<script src="http://marvl.infotech.monash.edu/webcola/cola.v3.min.js"></script>
+
+<script src="/lib/cytoscape/cytoscape.min.js" type="text/javascript"></script>
+<script src="/js/graphs/basic.js" type="text/javascript"></script>
 
 
-                    <div>Test Scope: {{sequenceSearch}}</div>
+<div class="row col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div>
+                <h1>DNA Search...</h1>
+                <p>
+                    Example: ATCGCCATCATCAACCTGCGCGAGAAGGGCAAAATGCGCGAAATAGAACGCATCATCGCCAAGAAATTCGAGACAGGCGTCATGCCTACCGCCAAGCAAATCTGCGAAAAGCAGTTGATGAAAGTCATCGACGACCTGGAAAAAGTGAAGGTGAACGAAGAAGAGATAGCTGACTTCATGCCCGACGTCTGCCGCAAGCTGGATTGGCTGTCCAAGGAAGACCTCATCAAGCGCATGGTGTCGCACGAGTTCAACCGCTTCGTGGAATACTACCGTGATCGCGAAGAAATAGAGACCGTCGGCACCAACGAAGAGAAGAAAGCTGGAAAAGGTAAAAAGAACGGCAGCCGCAAGGCCGAAGCGGGCTTCACGCGCCTCTTCATCAACGTGGGCAAAACAGACAACTTCTTCCCCACCGATCTCATCGGCCTCATCAACAGTAACACGAAAGGCCGCGTCGACCTGGGACGTATCGACCTGATGCGCAACTTCTCGTTCTTTGAGGTAGACGAAGCCGAAGCCGATAAGGTCATCAAAGCCCTGAACCGCACACGCTGGAACGGACGGAAAATCTCCGTCGAGCCGGCCGGAGAAGCCGACGAGAATACGGGCAGGAAAAAGGCCGAACGCAAAACCGAGAAGCCTGAACGCAAGAAAGCCGAAAAGCCCGCTAAGGAACCCAGACGCGCCAAGCCCAGCCGCGAAGAG
+                </p>
+                <p>Use case gene: MQKWERFFPNPDYMNIPSFSRSVSRGSAVGWFLVLLLVCGAGAGYYLYQDNLAKRKAAQELTAERKLKEKKAREAAEKQRIKREREIREKKEKERLAAQKAYEEAQEEKARQAAEAARKLQEQAEREEREKRRREELERREREEEARRQEEDTPVEEEPEPEGRFPQPVKNRMPELSVYSIPCRDDIQTEKDKLLETWSWDKAEKMEGMEEFPTGSSPWKKGKDAGRMQALLEKCREWKDAKLASLKACPAAKDFPGVPENGAQTVRRTVEIDSNIGGWHSTGLYAPPGAEISCSLSGAPKDGSISVRIGCHTDSLHKLDEWKRVPEITMQVPAGRGRVKMVNPMGGLVYVNVGQRPRRGKVFKVQISGAVPSPLFVMGKTTPEQWAEQLENTKAPWGEIRMPRLIVTMPVEQLKQCPDVQKTAEFLQKNMALQDWIMGWDTKPDRLHHPMRFVVDRQISAGAGHSGYPAMATKDWTNSIATGSIIHSGSWGLWHELGHNHQSPPFTMEGQTEVSVNIFSMVCEVMGTGKDFESCWGGGMGPYGMSAEMKKYFSGTQTYNEAPNKVQLFFWVELMYYLGFDAFRQVALQFHDKPYDNGELSDEKKWEWVMNAFSKVTGKNMGPFFKIWRTPVSERATGRMKDLPAWLPSKDYPACYTAEE</p>
+                <div class="row col-md-12">
+                    <textarea class="form-control input-lg" placeholder="Input a DNA sequence to search for..." ng-model="sequenceSearch" ng-trim="true"></textarea>
+                </div>
 
-                        <p>DNA etc ect</p>
-
-
-
-                    <div class="row col-md-6">
-                        <textarea class="form-control input-lg" placeholder="Input a DNA sequence to search for..." ng-model="sequenceSearch"  ng-trim="true"></textarea>
-                    </div>
-
+                <div class="row col-md-12">
                     <div class="row col-md-6">
                         <button ng-click="sequenceQuery()">Search</button>
                     </div>
+                </div>
 
-                    <div class="row col-md-12">
-                        <br>
-                        <div class="table-responsive">
-                            <table class="table">
-                                <tr>
-                                    <th>cog_ref</th>
-                                    <th>type</th>
-                                    <th>metadata</th>
-                                </tr>
-                                <tr class="clickable-row" >
-                                    <td>
-                                        asd
-                                    </td>
-                                    <td>
-                                        asd
-                                    </td>
-                                    <td>
-                                        asd
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                <div class="row col-md-12" ng-hide="tabular == null">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <theader>
+                                <h2>Results</h2></theader>
+                            <tr>
+                                <th>Gene</th>
+                                <th>Person id</th>
+                                <th>Scaffold</th>
+                                <th>Location</th>
+                                <th>Match%</th>
+                                <th>Alignment-Length</th>
+                                <th>Mismatches</th>
+                                <th>Gap opens</th>
+                                <th>Query Start</th>
+                                <th>Query End</th>
+                                <th>Sequence Start</th>
+                                <th>Sequence End</th>
+                                <th>E-Value</th>
+                                <th>Bit Score</th>
+                            </tr>
+                            <tr ng-repeat="row in tabular">
+                                <td ng-repeat="field in row">
+                                    {{field}}
+                                </td>
+                            </tr>
+                        </table>
                     </div>
-                    <br>
-                    <div class="row col-md-12" id="cy"></div>
+                </div>
+                <br>
+                <div class='row col-md-12'>
+                    <!--use this for showing details of selected nodes-->
+                    <table class="table">
+                        <theader>
+                            <h3>Selected Gene</h3></theader>
+                        <tr>
+                            <th>Code</th>
+                            <th>Person ID</th>
+                            <th>Coverage</th>
+                            <th>Type</th>
+                            <th>Scaffold</th>
+                            <th>Location Alightment</th>
+                            <th>COG Reference</th>
+                            <th>KEGG Reference</th>
+                            <th>Taxonomy</th>
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <td>{{selected_genome.genome.code}}</td>
+
+                            <td>{{selected_genome.genome.person_id}}</td>
+                            <td>{{selected_genome.genome.coverage}}</td>
+                            <td>{{selected_genome.genome.type}}</td>
+                            <td>{{selected_genome.genome.scaffold}}</td>
+                            <td>{{selected_genome.genome.location}}</td>
+                            <td>{{selected_genome.genome.cog_ref}}</td>
+                            <td>{{selected_genome.genome.kegg_ref}}</td>
+                            <td>
+                                <ul>
+                                    <li ng-repeat="tax in selected_genome.genome.taxonomy">{{tax}}</li>
+                                </ul>{{tax}}
+                            </td>
+                            <td>
+                                <button ng-click="expandGraph()">View Stats</button>
+                            </td>
+                    </table>
 
                 </div>
+                <div class='row col-md-12'>
+                    <div id="cy"></div>
+                </div>
+
             </div>
         </div>
     </div>
-
-</html>
+</div>

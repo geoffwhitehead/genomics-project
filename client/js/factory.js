@@ -28,20 +28,13 @@ mainApp.factory('dataFactory', function($http)
 
     _service.getGraphSeq = function(req)
     {
-        console.log("in factory");
         return $http.get(urlBase + "/graph/seq/"+req);
     };
-    // _service.getStudies = function()
-    // {
-    //     return $http.get(urlBase + "/studies");
-    // };
-    // _service.getRelationships = function()
-    // {
-    //     return $http.get(urlBase + "/studies/1/genes/1/relationships");
-    // };
-    // _service.getRead = function()
-    // {
-    //     return $http.get(urlBase + "/read");
-    // };
+
+    _service.getExpandedSequence = function(req){
+        console.log("REPSONSE");
+        return $http.get(urlBase + "/graph/seq/expand/"+req);
+    };
+
     return _service;
 });
