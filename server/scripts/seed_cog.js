@@ -118,29 +118,29 @@ function updateCog( id, genome, arr_size ) {
 
             var key = getAgeKey( person.age );
             c.metadata.age[ key ].count++;
-            c.metadata.age[ key ].genomes.push( genome.code );
+            //c.metadata.age[ key ].genomes.push( genome.code );
 
             key = getBMI( person.bmi );
             c.metadata.bmi[ key ].count++;
-            c.metadata.bmi[ key ].genomes.push( genome.code );
+            //c.metadata.bmi[ key ].genomes.push( genome.code );
 
             if ( person.gender == 'male' ) {
                 c.metadata.gender.male.count++;
-                c.metadata.gender.male.genomes.push( genome.code );
+                //c.metadata.gender.male.genomes.push( genome.code );
             }
             else {
                 c.metadata.gender.female.count++;
-                c.metadata.gender.female.genomes.push( genome.code );
+            //    c.metadata.gender.female.genomes.push( genome.code );
             }
 
             if ( person.ibd == 'Y' ) {
                 c.metadata.ibd.yes.count++;
-                c.metadata.ibd.yes.genomes.push( genome.code );
+                //c.metadata.ibd.yes.genomes.push( genome.code );
 
             }
             else {
                 c.metadata.ibd.no.count++;
-                c.metadata.ibd.no.genomes.push( genome.code );
+                //c.metadata.ibd.no.genomes.push( genome.code );
             }
             similars ++ ;
         }

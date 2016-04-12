@@ -1,0 +1,50 @@
+#!/bin/bash
+DIR="/Users/geoffwhitehead/data/network_project/blasts/"
+OUT="/Users/geoffwhitehead/data/network_project/blasts/parsed/"
+
+cat "$DIR"MH0001xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0001xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0001xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0001xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0001xab.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0001xab.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0001xac.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0001xac.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0001xad.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0001xad.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0001xae.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0001xae.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0002xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0002xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0002xab.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0002xab.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0002xac.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0002xac.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0002xad.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0002xad.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0002xae.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0002xae.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0003xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0003xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0003xab.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0003xab.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0003xac.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0003xac.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0003xad.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0003xad.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0003xae.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0003xae.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0004xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0004xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0004xab.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0004xab.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0004xac.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0004xac.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0004xad.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0004xad.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0004xae.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0004xae.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0005xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0005xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0005xab.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0005xab.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0005xac.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0005xac.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0005xad.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0005xad.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0005xae.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0005xae.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0006xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0006xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0006xab.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0006xab.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0006xac.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0006xac.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0006xad.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0006xad.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0006xae.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0006xae.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0007xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0007xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0007xab.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0007xab.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0007xac.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0007xac.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0007xad.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0007xad.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0007xae.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0007xae.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0008xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0008xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0008xab.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0008xab.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0008xac.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0008xac.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0008xad.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0008xad.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0008xae.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0008xae.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0009xaa.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0009xaa.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0009xab.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0009xab.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0009xac.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0009xac.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0009xad.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0009xad.gz.blast.e-val0.01.filtered.parsed
+cat "$DIR"MH0009xae.gz.blast.e-val0.01.filtered | paste - - > "$OUT"MH0009xae.gz.blast.e-val0.01.filtered.parsed
