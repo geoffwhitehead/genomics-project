@@ -19,9 +19,11 @@
     const KEYS_IBD = [ 'yes', 'no' ];
 
     const END_OF_COHORT = 9; // temporary var as im not using the entire cohort
+    const COG_POLL_LIMIT = 5;
+    const CAT_NODE_PERCENT_SIZE = 100;
 
     const NODE_SIZE = 200;
-    const MAX_NODE_SIZE = 500;
+    const MAX_NODE_SIZE = 700;
     const MIN_NODE_SIZE = 5;
 
     const REF_1_SCALE = 0.8;
@@ -41,25 +43,27 @@
     const CYAN = '#00FFFF';
     const BLACK = '#000000';
     const GREY = '#808080';
-    const YELLOW = '#FFFF00';
+    const YELLOW = '#ffcc00';
     const WHITE = '#FFFFFF';
     const ORANGE = '#FFA500'
     const BROWN = '#664200'
-    const PURPLE = '#800080'
+    const PURPLE = '#666699'
     const PINK = '#ff6699'
+    const TEAL = '#669999'
+    const DARK_RED = '#990033'
 
     const CAT_NODE = GREY;
     const QUERY_NODE = BLACK;
-    const GRP_BLAST = BLACK;
-    const GRP_AGE = RED;
-    const GRP_GENDER = YELLOW;
+
+    const GRP_BLAST = YELLOW;
+    const GRP_AGE = TEAL;
+    const GRP_GENDER = PURPLE;
     const GRP_BMI = ORANGE;
     const GRP_IBD = CYAN;
     const GRP_PPL = GREEN;
-
+    const GRP_ROOT = YELLOW;
 
     const EDGE_WIDTH = 3;
-    const EDGE_OPACITY = 1;
     const EDGE_FONT_SIZE = 12;
     const NODE_FONT_SIZE = 12;
     const NODE_BORDER_WIDTH = 4;
@@ -82,17 +86,39 @@
         res.render( 'index' );
     } );
 
-    //COG SEARCH
+    // gets some test nodes for graph setup
+    router.get( '/api/data/nodes', function( req, res ) {
+        var data = [];
+
+        data.push( { // node a
+            group: "nodes",
+            data: {
+                id: 'a'
+            },
+            position: {
+                x: 100,
+                y: 200
+            }
+        } );
+        res.send( data );
+    } );
+
+    // ************************************************************
+
+    // COG search : as the user types into the search field the server is queried and
+    // returns x COG references that match the users input.
+
     router.get( '/api/data/genes/:_searchString', function( req, res ) {
-        console.log( 'sending some data' );
 
         Cog.find( {
             "cog_id": new RegExp( req.params._searchString )
         }, function( err, data ) {
-            console.log( 'searched: ' + req.params._searchString + "-- returned: " + data );
-            if ( err ) res.send( err );
+            if ( err ) {
+                res.send({"status" : "err", "message": "Error fetching results from database : " + err});
+                return;
+            }
             else res.send( data );
-        } ).limit( 10 );
+        } ).limit( COG_POLL_LIMIT );
     } );
 
 
@@ -106,8 +132,6 @@
         var data = [];
         var cog_query = req.params._cog;
 
-        console.log( 'getting reference graph with cog: ' + cog_query );
-
         Cog.findOne( {
             "cog_id": new RegExp( req.params._cog )
         }, function( err, result ) {
@@ -120,7 +144,10 @@
                 data = addNodeCategory(true, data, 'cohort', 'Cohort', GRP_PPL, result.cog_id, 'Distribution over cohort', result.sampled_from, REF_1_SCALE );
 
             }
-            if ( err ) res.send( err );
+            if ( err ) {
+                res.send({"status" : "err", "message": "Error fetching results from database : " + err});
+                return;
+            }
             else res.send( data );
 
         } );
@@ -134,8 +161,6 @@
 
     router.get( '/api/data/graph/ref/2/:_cog', function( req, res ) {
         var data = [];
-
-        console.log( 'getting metadata graph with cog: ' + cog_query );
 
         Cog.findOne( {
             "cog_id": new RegExp( req.params._cog )
@@ -153,7 +178,10 @@
                 data = addNodeCategoryFromKeys( false, data, 'bmi', 'BMI', GRP_BMI, result.cog_id, 'Distribution over BMI', KEYS_BMI, result.metadata.bmi, null, REF_2_SCALE );
                 data = addNodeCategoryFromKeys( false, data, 'ibd', 'IBD', GRP_IBD, result.cog_id, 'Distribution over IDB', KEYS_IBD, result.metadata.ibd, null, REF_2_SCALE );
             }
-            if ( err ) res.send( err );
+            if ( err ) {
+                res.send({"status" : "err", "message": "Error fetching results from database : " + err});
+                return;
+            }
             else res.send( data );
         } );
     } );
@@ -187,7 +215,10 @@
                     data = addNodeCategoryFromKeys( true, data, 'ibd', 'IBD', GRP_IBD, result.cog_id, 'Distribution over IDB', KEYS_IBD, result.metadata.ibd, ref.ibd, REF_3_SCALE );
 
                 }
-                if ( err ) res.send( err );
+                if ( err ) {
+                    res.send({"status" : "err", "message": "Error fetching results from database : " + err});
+                    return;
+                }
                 else res.send( data );
             } );
         } );
@@ -279,20 +310,19 @@
                                             if ( err ) console.log( err );
                                             // check for multiple cogs
                                             var references = gene.cog_ref.toString().split( ';' );
-                                            console.log( references );
 
                                             if ( references.length == 1 ) { // currently not handling multiple cog references
-                                                if ( gene.cog_ref != "NA" ) { // currently not handling COG references that are NA, filter these out
+                                                //if ( gene.cog_ref != "NA" ) { // currently not handling COG references that are NA, filter these out
                                                     var match = Math.round( fields[ 5 ] * 10 ) / 10 + "% Match";
                                                     var node_size = ( fields[ 5 ] ) * SEQ_BLAST_SCALE;
-                                                    var name = "COG Ref: " + gene.cog_ref + "\n" + match;
+                                                    var name = "Gene ID: " + gene.code + "\nCOG Ref: " + gene.cog_ref + "\n" + match;
 
                                                     data_nodes.push( createNode( gene._id, node_size, node_size, GRP_BLAST, name, CAT_NODE ) );
-                                                    data_nodes.push( createEdge( gene._id + ':edge', 'root', gene._id, match, EDGE_WIDTH, EDGE_OPACITY, CAT_NODE ) );
+                                                    data_nodes.push( createEdge( gene._id + ':edge', 'root', gene._id, match, EDGE_WIDTH,  GRP_ROOT ) );
                                                     data_genomes[ gene._id ] = {
                                                         gene
                                                     }
-                                                };
+                                                    //}
                                             }
                                         }
                                         else {
@@ -301,7 +331,7 @@
                                         processed_count++;
                                         if ( processed_count == result_count ) {
                                             var node_size = resolveCategoryNodeSize( SEQ_BLAST_SCALE );
-                                            data_nodes.push( createNode( 'root', node_size, node_size, QUERY_NODE, 'Root' ) ); // ROOT NODE
+                                            data_nodes.push( createNode( 'root', node_size, node_size, QUERY_NODE, 'Root', GRP_ROOT ) ); // ROOT NODE
                                             data[ 'nodes' ] = data_nodes;
                                             data[ 'tabular' ] = data_tabular;
                                             data[ 'genomes' ] = data_genomes;
@@ -318,9 +348,9 @@
                             } );
                     }
                     else {
-                        // TODO: handle returning errors to the client
-                        console.log( "error fetching results: " + code );
+                        res.send({"status" : "err", "message": "Error fetching results from database : " + err});
                         return;
+
                     }
                 } );
             } );
@@ -329,15 +359,16 @@
 
     // ************************************************************
 
-    // Sequence Search: Expand: This graph will perform a weighted metadata query on the COG that
+    // Sequence Search: COG Expand: This graph will perform a weighted metadata query on the COG that
     // the user selected when they pressed the search button. It will return a collection of nodes representing
-    // all the metadat on that node and then attach those nodes to the selected node.
+    // all the metadat on that COG reference and then attach those nodes to the initial selected node.
 
     router.get( '/api/data/graph/seq/expand/:_id', function( req, res ) {
 
         var data = {};
         var data_nodes = [];
         var root_id = req.params._id;
+
 
         // find the gene that user clicked on to expand
         Genome.findOne( {
@@ -346,11 +377,14 @@
             if ( err ) res.send( err );
 
             if ( !gene ) {
-                res.send( {
-                    "response": "err",
-                    "data": "no gene found"
-                } );
-                return 1;
+                res.send({"status" : "err", "message": "Cannot find a gene with this identifier"});
+                return;
+            }
+
+
+            if ( gene.cog_ref == "NA" ) { // currently not handling COG references that are NA, filter these out
+                res.send({"status" : "err", "message": "Cannot show COG metadata for an 'NA' COG reference"});
+                return;
             }
 
             // find a the entry for this genes COG
@@ -381,10 +415,10 @@
 
                         for ( var i = 0; i < END_OF_COHORT; i++ ) {
 
-                            data_nodes.push( createEdge( 'e_' + people[ i ].id + '_age', 'n_' + people[ i ].id, 'n_age_' + getAgeKey( people[ i ].age ), '', EDGE_WIDTH, EDGE_OPACITY, GRP_AGE ) );
-                            data_nodes.push( createEdge( 'e_' + people[ i ].id + '_bmi', 'n_' + people[ i ].id, 'n_bmi_' + getBMIKey( people[ i ].bmi ), '', EDGE_WIDTH, EDGE_OPACITY, GRP_BMI ) );
-                            data_nodes.push( createEdge( 'e_' + people[ i ].id + '_gender', 'n_' + people[ i ].id, 'n_gender_' + getGenderKey( people[ i ].gender ), '', EDGE_WIDTH, EDGE_OPACITY, GRP_GENDER ) );
-                            data_nodes.push( createEdge( 'e_' + people[ i ].id + '_ibd', 'n_' + people[ i ].id, 'n_ibd_' + getIBDKey( people[ i ].ibd ), '', EDGE_WIDTH, EDGE_OPACITY, GRP_IBD ) );
+                            data_nodes.push( createEdge( 'e_' + people[ i ].id + '_age', 'n_' + people[ i ].id, 'n_age_' + getAgeKey( people[ i ].age ), '', EDGE_WIDTH,  GRP_AGE ) );
+                            data_nodes.push( createEdge( 'e_' + people[ i ].id + '_bmi', 'n_' + people[ i ].id, 'n_bmi_' + getBMIKey( people[ i ].bmi ), '', EDGE_WIDTH,  GRP_BMI ) );
+                            data_nodes.push( createEdge( 'e_' + people[ i ].id + '_gender', 'n_' + people[ i ].id, 'n_gender_' + getGenderKey( people[ i ].gender ), '', EDGE_WIDTH,  GRP_GENDER ) );
+                            data_nodes.push( createEdge( 'e_' + people[ i ].id + '_ibd', 'n_' + people[ i ].id, 'n_ibd_' + getIBDKey( people[ i ].ibd ), '', EDGE_WIDTH,  GRP_IBD ) );
 
                         };
 
@@ -400,6 +434,114 @@
 
 
 
+    // ************************************************************
+
+    // Gene Search: Expand: This graph will perform a weighted metadata query on the gene that
+    // the user selected when they pressed the search button. It will return a collection of nodes representing
+    // all the metadata of that gene and then attach those nodes to the initial selected node.
+
+
+    router.get( '/api/data/graph/seq/gene/:_id', function( req, res ) {
+
+        var data = {};
+        var data_nodes = [];
+        var root_id = req.params._id;
+
+
+        // find the gene that user clicked on to expand
+        Genome.findOne( {
+            "_id": root_id
+        }, function( err, gene ) {
+            if ( err ) res.send( err );
+
+            if ( !gene ) {
+                res.send({"status" : "err", "message": "Cannot find a gene with this identifier"});
+                return;
+            }
+
+            Person.find({}, function(err, people) {
+
+                Ref.findOne( {}, function( err, ref ) {
+
+                    var gene_data = createGeneDataStructure(people);
+                    populateGeneData(gene_data, people, gene );
+
+                    data_nodes = addNodeCategory(true, data_nodes, 'cohort', 'Cohort', GRP_PPL, root_id, 'Distribution over cohort', gene_data.cohort, SEQ_BLAST_SCALE );
+                    data_nodes = addNodeCategoryFromKeys( true, data_nodes, 'age', 'Age', GRP_AGE, root_id, 'Distribution over age', KEYS_AGE, gene_data.age, ref.age, SEQ_BLAST_SCALE )
+                    data_nodes = addNodeCategoryFromKeys( true, data_nodes, 'gender', 'Gender', GRP_GENDER, root_id, 'Distribution over gender', KEYS_GENDER, gene_data.gender, ref.gender, SEQ_BLAST_SCALE );
+                    data_nodes = addNodeCategoryFromKeys( true, data_nodes, 'bmi', 'BMI', GRP_BMI, root_id, 'Distribution over BMI', KEYS_BMI, gene_data.bmi, ref.bmi, SEQ_BLAST_SCALE );
+                    data_nodes = addNodeCategoryFromKeys( true, data_nodes, 'ibd', 'IBD', GRP_IBD, root_id, 'Distribution over IBD', KEYS_IBD, gene_data.ibd, ref.ibd, SEQ_BLAST_SCALE );
+
+                    for ( var i = 0; i < END_OF_COHORT; i++ ) {
+
+                        data_nodes.push( createEdge( 'e_' + people[ i ].id + '_age', 'n_' + people[ i ].id, 'n_age_' + getAgeKey( people[ i ].age ), '', EDGE_WIDTH,  GRP_AGE ) );
+                        data_nodes.push( createEdge( 'e_' + people[ i ].id + '_bmi', 'n_' + people[ i ].id, 'n_bmi_' + getBMIKey( people[ i ].bmi ), '', EDGE_WIDTH,  GRP_BMI ) );
+                        data_nodes.push( createEdge( 'e_' + people[ i ].id + '_gender', 'n_' + people[ i ].id, 'n_gender_' + getGenderKey( people[ i ].gender ), '', EDGE_WIDTH,  GRP_GENDER ) );
+                        data_nodes.push( createEdge( 'e_' + people[ i ].id + '_ibd', 'n_' + people[ i ].id, 'n_ibd_' + getIBDKey( people[ i ].ibd ), '', EDGE_WIDTH,  GRP_IBD ) );
+
+                    };
+
+                    data[ 'nodes' ] = data_nodes;
+
+                    res.send( data );
+                }) // end of reference find
+            }) // end of person find
+        } ); // end of genome find
+    } ); // end of router get
+
+
+    // populates a gene strcture with metadata on a gene.
+    function populateGeneData(gene_data, people, gene ){
+        for (var i = 0; i < gene.similar_scaffolds.length; i++) {
+            var p_index = findPersonIndex(people, gene.similar_scaffolds[i].person_id);
+            console.log("werwerewrwer");
+            gene_data.age[getAgeKey(people[p_index].age)].count++;
+            gene_data.bmi[getBMIKey(people[p_index].bmi)].count++;
+            gene_data.gender[getGenderKey(people[p_index].gender)].count++;
+            gene_data.ibd[getIBDKey(people[p_index].ibd)].count++;
+            gene_data.cohort[findPersonIndex(gene_data['cohort'], people[p_index].id)].count++;
+
+        }
+    }
+
+    // creates an empty metadata structure ready to be populated
+    function createGeneDataStructure(people_array) {
+
+        var gene_data = {};
+        gene_data['age'] = {};
+        gene_data['bmi'] = {};
+        gene_data['gender'] = {};
+        gene_data['ibd'] = {};
+        gene_data['cohort'] = [];
+
+        for (var i = 0; i < KEYS_AGE.length; i++) {
+            gene_data.age[KEYS_AGE[i]] = {}
+            gene_data.age[KEYS_AGE[i]].count = 0;
+        }
+        for (var i = 0; i < KEYS_BMI.length; i++) {
+            gene_data.bmi[KEYS_BMI[i]] = {};
+            gene_data.bmi[KEYS_BMI[i]].count = 0;
+        }
+        for (var i = 0; i < KEYS_GENDER.length; i++) {
+            gene_data.gender[KEYS_GENDER[i]] = {};
+            gene_data.gender[KEYS_GENDER[i]].count = 0;
+        }
+        for (var i = 0; i < KEYS_IBD.length; i++) {
+            gene_data.ibd[KEYS_IBD[i]] = {};
+            gene_data.ibd[KEYS_IBD[i]].count = 0;
+        }
+        for (var i = 0; i < END_OF_COHORT; i++) {
+            gene_data.cohort[i] = {};
+            gene_data.cohort[i].id = people_array[i].id;
+            gene_data.cohort[i].count = 0;
+        }
+        return gene_data;
+    }
+
+
+    // used to determine the maximum counts in order to scale the nodes correctly so that they dont exceed the maximum
+    // size and also that all nodes are sized proportional to each other. Can size the nodes relative to their occurence
+    // or relative to their occurence and that properties occurence within the cohort (weighting).
     function getNodeUnitFromKeys( is_weighted, key_array, metadata_array, ref_array ) {
         var arr = [];
 
@@ -418,13 +560,26 @@
         return getUnitScale( arr );
     }
 
+    // This is used for creating a category of nodes from an array of objects with a count property.
+    // Currently, its used to create the "cohort" category.
+
     function addNodeCategory(has_id, node_array, category, cat_label, group, edge_source, edge_label, metadata_array, scale ){
         var cat_node_size = resolveCategoryNodeSize(scale);
         var node_unit = getUnitScale(metadata_array);
 
+        var edge_source = edge_source; // local scope
+
+        // adjustment for showing cohort distribution: adds an node which
+        // creates a better distributed graph by lowering the level of all the
+        // descendent nodes.
+        if (group == GRP_PPL) {
+            node_array.push( createNode( 'n_'+category+'link', cat_node_size, cat_node_size, WHITE, ' ', WHITE ));
+            node_array.push( createEdge( 'e_'+category+"link", edge_source, 'n_'+category+'link', ' ', EDGE_WIDTH,  CAT_NODE ) );
+            edge_source = 'n_'+category+'link';
+        }
         // create category node and edge
         node_array.push( createNode( 'n_'+category, cat_node_size, cat_node_size, CAT_NODE, cat_label, group ));
-        node_array.push( createEdge( 'e_'+category, edge_source, 'n_'+category, edge_label, EDGE_WIDTH, EDGE_OPACITY, CAT_NODE ) );
+        node_array.push( createEdge( 'e_'+category, edge_source, 'n_'+category, edge_label, EDGE_WIDTH,  CAT_NODE ) );
 
         for ( var i = 0; i < metadata_array.length; i++ ) {
             var count = metadata_array[ i ].count
@@ -438,20 +593,22 @@
             }
 
             node_array.push( createNode( 'n_' + name, node_size, node_size, group, name ) );
-            node_array.push( createEdge( 'e_' + name, 'n_'+ category, 'n_' + name, 'Occurrences: ' + count, EDGE_WIDTH, EDGE_OPACITY, group ) );
+            node_array.push( createEdge( 'e_' + name, 'n_'+ category, 'n_' + name, 'Occurrences: ' + count, EDGE_WIDTH, group ) );
         }
 
         return node_array;
 
     }
 
+    // this function will create nodes and edges for an entire category of nodes.
+    // The format of the category structure must be object orientated - not array
     function addNodeCategoryFromKeys( is_weighted, node_array, category, cat_label, group, edge_source, edge_label, key_array, metadata_array, ref_array, scale ) {
 
         var node_unit = getNodeUnitFromKeys( is_weighted, key_array, metadata_array, ref_array );
         var cat_node_size = resolveCategoryNodeSize(scale);
 
         node_array.push( createNode( 'n_' + category, cat_node_size, cat_node_size, CAT_NODE, cat_label, group ) );
-        node_array.push( createEdge( 'e_' + category, edge_source, 'n_' + category, edge_label, EDGE_WIDTH, EDGE_OPACITY, CAT_NODE ) );
+        node_array.push( createEdge( 'e_' + category, edge_source, 'n_' + category, edge_label, EDGE_WIDTH, CAT_NODE ) );
 
 
         for ( var key in key_array ) {
@@ -468,34 +625,17 @@
             var name = category + '_' + current_key;
             var label;
 
-            is_weighted ? label = 'Score' : label = 'Count';
+            is_weighted ? label = 'Score ' : label = 'Count';
 
             node_array.push( createNode( 'n_' + name, node_size, node_size, group, current_key ) );
-            node_array.push( createEdge( 'e_' + name, 'n_' + category, 'n_' + name, label + score, EDGE_WIDTH, EDGE_OPACITY, group ) );
+            node_array.push( createEdge( 'e_' + name, 'n_' + category, 'n_' + name, label + score, EDGE_WIDTH, group ) );
 
         }
 
         return node_array;
     }
 
-    // gets some test nodes for graph setup
-    router.get( '/api/data/nodes', function( req, res ) {
-        console.log( 'sending some data' );
-        var data = [];
-
-        data.push( { // node a
-            group: "nodes",
-            data: {
-                id: 'a'
-            },
-            position: {
-                x: 100,
-                y: 200
-            }
-        } );
-        res.send( data );
-    } );
-
+    // given an id, use this function to find the index for that person
     function findPersonIndex( array, person_id ) {
         for ( var i = 0; i < array.length; i++ ) {
             if ( array[ i ].id == person_id ) {
@@ -504,8 +644,10 @@
         }
     }
 
+    // this function takes a category array. It iterates over the array to find the maximum count
+    // that exists. Using this we an perform a linear interpolation on the node sizes to ensure they
+    // remain within size bounderies but still size themselves proportionally to the max count.
     function getUnitScale( array ) {
-        console.log('ARRAYYYYYY: ' + array);
         var max = array[ 0 ].count;
 
         for ( var i = 0; i < array.length; i++ ) {
@@ -519,16 +661,20 @@
     // used to return a size that is scaled proportionally to all the nodes in the group
     function resolveSize( object_count, node_unit, graph_scale ) {
         var resolved_size = ( object_count * node_unit ) * graph_scale;
+        // use the following check to ensure that nodes have a size above 0. If
+        // nodes are not above 0 then cytoscape automatically doesnt draw an edge to this node.
         if ( resolved_size < MIN_NODE_SIZE ) {
             resolved_size = MIN_NODE_SIZE;
         }
         return resolved_size
     }
 
+    // ensures category nodes are the same size and scaled proportionally
     function resolveCategoryNodeSize( graph_scale ) {
-        return ( CAT_NODE_SCALE * 100 ) * graph_scale;
+        return ( CAT_NODE_SCALE * CAT_NODE_PERCENT_SIZE ) * graph_scale;
     }
 
+    // function to create a single node
     function createNode( node_id, width, height, colour, label, border_colour ) {
         if ( typeof border_colour === 'undefined' ) {
             border_colour = colour
@@ -553,7 +699,8 @@
         }
     }
 
-    function createEdge( edge_id, source_node, target_node, label, width, opacity, colour ) {
+    // function to create a single edge
+    function createEdge( edge_id, source_node, target_node, label, width, colour ) {
         return { // insert a new edge
             data: {
                 id: edge_id,
@@ -564,17 +711,18 @@
                 label: label,
                 'font-size': EDGE_FONT_SIZE,
                 'width': width,
-                'opacity': opacity,
                 'line-color': colour,
                 'target-arrow-color': colour,
             },
 
-            classes: 'autorotate'
+            classes: 'autorotate outline',
         }
     }
 
 
-
+    // metadata nodes represent an age range.
+    // use this to quickly determine the age range an age lies in. This will return that age range
+    // which can be used as an index
     function getAgeKey( age ) {
         var key;
         if ( age < 11 ) {
@@ -604,6 +752,9 @@
         return key;
     }
 
+    // metadata nodes represent a BMI range.
+    // use this to quickly determine the bmi range a bmi value lies in. This will return that bmi range
+    // which can be used as an index
     function getBMIKey( bmi ) {
         var key;
         if ( bmi < 18.5 ) {

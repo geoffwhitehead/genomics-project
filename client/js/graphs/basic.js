@@ -3,7 +3,7 @@ var cy = "";
 var cytoscape = require( 'cytoscape' );
 var cycola = require( 'cytoscape-cola' );
 var cola = require( 'cola' );
-
+var active_node;
 cycola( cytoscape, cola ); // register extension
 function drawGraph() {
 
@@ -47,6 +47,18 @@ function drawGraph() {
                     style: {
                         'text-wrap': 'wrap'
                     }
+                },
+                {
+                    selector: '.unfocused',
+                    style: {
+                        'opacity': 0.2
+                    }
+                },
+                {
+                    selector: '.focused',
+                    style: {
+                        'opacity': 1
+                    }
                 }
 
             ],
@@ -66,6 +78,39 @@ function drawGraph() {
                 scope.selected_genome = scope.genomes[ id ];
             } );
         } )
+        .on ('mouseover', 'node', function(evt){
+            active_node = this.id();
+
+            var nodes = cy.nodes();
+
+            for (var i = 0; i < nodes.length; i++) {
+                nodes[i].addClass('unfocused')
+                nodes[i].connectedEdges().forEach(function(e){
+                    e.addClass('unfocused')
+                })
+            }
+            cy.nodes('node[id="'+active_node+'"]').connectedEdges().forEach(function(e){
+                e.removeClass('unfocused');
+                e.addClass('focused');
+                e.connectedNodes().forEach(function(n){
+                    n.removeClass('unfocused');
+                    n.addClass('focused');
+                })
+            })
+        })
+        .on ('mouseout', 'node', function(){
+
+            var nodes = cy.nodes();
+
+            cy.nodes().forEach(function(n){
+                n.removeClass('focused');
+                n.removeClass('unfocused');
+                n.connectedEdges().forEach(function(e){
+                    e.removeClass('unfocused');
+                    e.removeClass('focused');
+                })
+            });
+        })
 }
 
 function addNodes( nodes ) {

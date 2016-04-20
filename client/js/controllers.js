@@ -5,6 +5,7 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
     {
         console.log(err);
     };
+
     var minInput = 2;
     $scope.geneSearch = '';
 
@@ -21,7 +22,7 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
         if ($scope.geneSearch.length >= minInput)
         {
             // perform query and get new scope for genes
-            dataFactory.getGeneSearch($scope.geneSearch.toUpperCase()).then(function(data)
+            dataFactory.getInputSearch($scope.geneSearch.toUpperCase()).then(function(data)
             {
                 $scope.genes = data.data;
             }).catch(errorHandler);
@@ -79,13 +80,37 @@ mainApp.controller('DataController', function($rootScope, $scope, dataFactory, $
     {
         dataFactory.getExpandedSequence($scope.selected_genome.gene._id).then(function(payload)
         {
-            for (var i = 0; i < payload.data.nodes.length; i++)
-            {
-                $scope.nodes[$scope.nodes.length] = payload.data.nodes[i]
-                $scope.genomes = $scope.genomes;
+            if (payload.data.status != 'err'){
+
+
+                for (var i = 0; i < payload.data.nodes.length; i++)
+                {
+                    $scope.nodes[$scope.nodes.length] = payload.data.nodes[i]
+                    $scope.genomes = $scope.genomes;
+                }
+                console.log('PAYLOAD ' + payload);
+                expandNodes($scope.nodes);
             }
-            console.log('PAYLOAD ' + payload);
-            expandNodes($scope.nodes);
+            $scope.error = payload.data.message;
+        })
+    }
+
+    $scope.searchByGeneID = function()
+    {
+        dataFactory.getGeneSearch($scope.selected_genome.gene._id).then(function(payload)
+        {
+            if (payload.data.status != 'err'){
+
+
+                for (var i = 0; i < payload.data.nodes.length; i++)
+                {
+                    $scope.nodes[$scope.nodes.length] = payload.data.nodes[i]
+                    $scope.genomes = $scope.genomes;
+                }
+                console.log('PAYLOAD ' + payload);
+                expandNodes($scope.nodes);
+            }
+            $scope.error = payload.data.message;
         })
     }
 });

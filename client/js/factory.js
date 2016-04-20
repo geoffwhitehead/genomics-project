@@ -3,7 +3,7 @@ mainApp.factory('dataFactory', function($http)
     var urlBase = '/api/data';
     var _service = {};
 
-    _service.getGeneSearch = function(req)
+    _service.getInputSearch = function(req)
     {
         return $http.get(urlBase + "/genes/" + req);
     };
@@ -32,8 +32,11 @@ mainApp.factory('dataFactory', function($http)
     };
 
     _service.getExpandedSequence = function(req){
-        console.log("REPSONSE");
         return $http.get(urlBase + "/graph/seq/expand/"+req);
+    };
+
+    _service.getGeneSearch = function(req){
+        return $http.get(urlBase + "/graph/seq/gene/"+req);
     };
 
     return _service;

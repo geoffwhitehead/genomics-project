@@ -17,12 +17,15 @@
         <div class="panel-body">
             <div>
                 <h1>DNA Search...</h1>
-                <p>
-                    Example: ATCGCCATCATCAACCTGCGCGAGAAGGGCAAAATGCGCGAAATAGAACGCATCATCGCCAAGAAATTCGAGACAGGCGTCATGCCTACCGCCAAGCAAATCTGCGAAAAGCAGTTGATGAAAGTCATCGACGACCTGGAAAAAGTGAAGGTGAACGAAGAAGAGATAGCTGACTTCATGCCCGACGTCTGCCGCAAGCTGGATTGGCTGTCCAAGGAAGACCTCATCAAGCGCATGGTGTCGCACGAGTTCAACCGCTTCGTGGAATACTACCGTGATCGCGAAGAAATAGAGACCGTCGGCACCAACGAAGAGAAGAAAGCTGGAAAAGGTAAAAAGAACGGCAGCCGCAAGGCCGAAGCGGGCTTCACGCGCCTCTTCATCAACGTGGGCAAAACAGACAACTTCTTCCCCACCGATCTCATCGGCCTCATCAACAGTAACACGAAAGGCCGCGTCGACCTGGGACGTATCGACCTGATGCGCAACTTCTCGTTCTTTGAGGTAGACGAAGCCGAAGCCGATAAGGTCATCAAAGCCCTGAACCGCACACGCTGGAACGGACGGAAAATCTCCGTCGAGCCGGCCGGAGAAGCCGACGAGAATACGGGCAGGAAAAAGGCCGAACGCAAAACCGAGAAGCCTGAACGCAAGAAAGCCGAAAAGCCCGCTAAGGAACCCAGACGCGCCAAGCCCAGCCGCGAAGAG
-                </p>
-                <p>Use case gene: MQKWERFFPNPDYMNIPSFSRSVSRGSAVGWFLVLLLVCGAGAGYYLYQDNLAKRKAAQELTAERKLKEKKAREAAEKQRIKREREIREKKEKERLAAQKAYEEAQEEKARQAAEAARKLQEQAEREEREKRRREELERREREEEARRQEEDTPVEEEPEPEGRFPQPVKNRMPELSVYSIPCRDDIQTEKDKLLETWSWDKAEKMEGMEEFPTGSSPWKKGKDAGRMQALLEKCREWKDAKLASLKACPAAKDFPGVPENGAQTVRRTVEIDSNIGGWHSTGLYAPPGAEISCSLSGAPKDGSISVRIGCHTDSLHKLDEWKRVPEITMQVPAGRGRVKMVNPMGGLVYVNVGQRPRRGKVFKVQISGAVPSPLFVMGKTTPEQWAEQLENTKAPWGEIRMPRLIVTMPVEQLKQCPDVQKTAEFLQKNMALQDWIMGWDTKPDRLHHPMRFVVDRQISAGAGHSGYPAMATKDWTNSIATGSIIHSGSWGLWHELGHNHQSPPFTMEGQTEVSVNIFSMVCEVMGTGKDFESCWGGGMGPYGMSAEMKKYFSGTQTYNEAPNKVQLFFWVELMYYLGFDAFRQVALQFHDKPYDNGELSDEKKWEWVMNAFSKVTGKNMGPFFKIWRTPVSERATGRMKDLPAWLPSKDYPACYTAEE</p>
+                <p>Use case gene: MQKWERFFPNPDYMNIPSFSRSVSRGSAVGWFLVLLLVCGAGAGYYLYQDNLAKRKAAQELTAERKLKEKKAREAA</br>EKQRIKREREIREKKEKERLAAQKAYEEAQEEKARQAAEAARKLQEQAEREEREKRRREELERREREEEARRQEEDTPVEEEPEPEGRFPQPVKNRMPEL</br>SVYSIPCRDDIQTEKDKLLETWSWDKAEKMEGMEEFPTGSSPWKKGKDAGRMQALLEKCREWKDAKLASLKACPAAKDFPGVPENGAQTVRRTVEIDS</br>NIGGWHSTGLYAPPGAEISCSLSGAPKDGSISVRIGCHTDSLHKLDEWKRVPEITMQVPAGRGRVKMVNPMGGLVYVNVGQRPRRGKVFKVQISGAVPS</br>PLFVMGKTTPEQWAEQLENTKAPWGEIRMPRLIVTMPVEQLKQCPDVQKTAEFLQKNMALQDWIMGWDTKPDRLHHPMRFVVDRQISAGAGHSGYPA</br>MATKDWTNSIATGSIIHSGSWGLWHELGHNHQSPPFTMEGQTEVSVNIFSMVCEVMGTGKDFESCWGGGMGPYGMSAEMKKYFSGTQTYNEAPNK</br>VQLFFWVELMYYLGFDAFRQVALQFHDKPYDNGELSDEKKWEWVMNAFSKVTGKNMGPFFKIWRTPVSERATGRMKDLPAWLPSKDYPACYTAEE</p>
                 <div class="row col-md-12">
-                    <textarea class="form-control input-lg" placeholder="Input a DNA sequence to search for..." ng-model="sequenceSearch" ng-trim="true"></textarea>
+                    <textarea class="form-control input-lg" placeholder="MQKWERFFPNPDYMNIPSFSRSVSRGSAVGWFLVLLLVCGAGAGYYLYQDNLAKRKAAQELTAERKLKEKKAREAA
+EKQRIKREREIREKKEKERLAAQKAYEEAQEEKARQAAEAARKLQEQAEREEREKRRREELERREREEEARRQEEDTPVEEEPEPEGRFPQPVKNRMPEL
+SVYSIPCRDDIQTEKDKLLETWSWDKAEKMEGMEEFPTGSSPWKKGKDAGRMQALLEKCREWKDAKLASLKACPAAKDFPGVPENGAQTVRRTVEIDS
+NIGGWHSTGLYAPPGAEISCSLSGAPKDGSISVRIGCHTDSLHKLDEWKRVPEITMQVPAGRGRVKMVNPMGGLVYVNVGQRPRRGKVFKVQISGAVPS
+PLFVMGKTTPEQWAEQLENTKAPWGEIRMPRLIVTMPVEQLKQCPDVQKTAEFLQKNMALQDWIMGWDTKPDRLHHPMRFVVDRQISAGAGHSGYPA
+MATKDWTNSIATGSIIHSGSWGLWHELGHNHQSPPFTMEGQTEVSVNIFSMVCEVMGTGKDFESCWGGGMGPYGMSAEMKKYFSGTQTYNEAPNK
+VQLFFWVELMYYLGFDAFRQVALQFHDKPYDNGELSDEKKWEWVMNAFSKVTGKNMGPFFKIWRTPVSERATGRMKDLPAWLPSKDYPACYTAEE" ng-model="sequenceSearch" ng-trim="true"></textarea>
                 </div>
 
                 <div class="row col-md-12">
@@ -61,6 +64,9 @@
                     </div>
                 </div>
                 <br>
+                <div class="row col-md-12 alert alert-danger" ng-show="error">
+                  <strong>Error:</strong> {{error}}
+                </div>
                 <div class='row col-md-12'>
                     <!--use this for showing details of selected nodes-->
                     <table class="table">
@@ -76,28 +82,31 @@
                             <th>COG Reference</th>
                             <th>KEGG Reference</th>
                             <th>Taxonomy</th>
-                            <th></th>
+                            <th>Search Cog Ref</th>
+                            <th>Search Gene ID</th>
                         </tr>
                         <tr>
-                            <td>{{selected_genome.genome.code}}</td>
+                            <td>{{selected_genome.gene.code}}</td>
 
-                            <td>{{selected_genome.genome.person_id}}</td>
-                            <td>{{selected_genome.genome.coverage}}</td>
-                            <td>{{selected_genome.genome.type}}</td>
-                            <td>{{selected_genome.genome.scaffold}}</td>
-                            <td>{{selected_genome.genome.location}}</td>
-                            <td>{{selected_genome.genome.cog_ref}}</td>
-                            <td>{{selected_genome.genome.kegg_ref}}</td>
+                            <td>{{selected_genome.gene.person_id}}</td>
+                            <td>{{selected_genome.gene.coverage}}</td>
+                            <td>{{selected_genome.gene.type}}</td>
+                            <td>{{selected_genome.gene.scaffold}}</td>
+                            <td>{{selected_genome.gene.location}}</td>
+                            <td>{{selected_genome.gene.cog_ref}}</td>
+                            <td>{{selected_genome.gene.kegg_ref}}</td>
                             <td>
                                 <ul>
                                     <li ng-repeat="tax in selected_genome.genome.taxonomy">{{tax}}</li>
                                 </ul>{{tax}}
                             </td>
                             <td>
-                                <button ng-click="expandGraph()">View Stats</button>
+                                <button ng-show='selected_genome.gene.cog_ref != "NA"' ng-click="expandGraph()">Search</button>
+                            </td>
+                            <td>
+                                <button ng-click="searchByGeneID()">Search</button>
                             </td>
                     </table>
-
                 </div>
                 <div class='row col-md-12'>
                     <div id="cy"></div>
