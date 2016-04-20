@@ -22,8 +22,8 @@
     const COG_POLL_LIMIT = 5;
     const CAT_NODE_PERCENT_SIZE = 100;
 
-    const NODE_SIZE = 200;
-    const MAX_NODE_SIZE = 700;
+    const NODE_SIZE = 300;
+    //const MAX_NODE_SIZE = 700;
     const MIN_NODE_SIZE = 5;
 
     const REF_1_SCALE = 0.8;
@@ -141,7 +141,7 @@
                 var cat_node_size = resolveCategoryNodeSize( REF_1_SCALE )
                 data.push( createNode( cog_query, cat_node_size, cat_node_size, QUERY_NODE, cog_query, GRP_PPL ) );
                 // create the categories and respective nodes
-                data = addNodeCategory(true, data, 'cohort', 'Cohort', GRP_PPL, result.cog_id, 'Distribution over cohort', result.sampled_from, REF_1_SCALE );
+                data = addNodeCategory(true, data, 'cohort', 'Cohort', GRP_PPL, result.cog_id, 'Distribution over cohort', result.sampled_from, REF_1_SCALE, false );
 
             }
             if ( err ) {
@@ -393,7 +393,7 @@
             }, function( err, result ) {
                 if ( err ) res.send( err );
 
-                data_nodes = addNodeCategory(true, data_nodes, 'cohort', 'Cohort', GRP_PPL, root_id, 'Distribution over cohort', result.sampled_from, SEQ_BLAST_SCALE );
+                data_nodes = addNodeCategory(true, data_nodes, 'cohort', 'Cohort', GRP_PPL, root_id, 'Distribution over cohort', result.sampled_from, SEQ_BLAST_SCALE, true );
 
                 // pull the reference table which contains the weightings
                 Ref.findOne( {}, function( err, ref ) {
@@ -466,7 +466,7 @@
                     var gene_data = createGeneDataStructure(people);
                     populateGeneData(gene_data, people, gene );
 
-                    data_nodes = addNodeCategory(true, data_nodes, 'cohort', 'Cohort', GRP_PPL, root_id, 'Distribution over cohort', gene_data.cohort, SEQ_BLAST_SCALE );
+                    data_nodes = addNodeCategory(true, data_nodes, 'cohort', 'Cohort', GRP_PPL, root_id, 'Distribution over cohort', gene_data.cohort, SEQ_BLAST_SCALE, true );
                     data_nodes = addNodeCategoryFromKeys( true, data_nodes, 'age', 'Age', GRP_AGE, root_id, 'Distribution over age', KEYS_AGE, gene_data.age, ref.age, SEQ_BLAST_SCALE )
                     data_nodes = addNodeCategoryFromKeys( true, data_nodes, 'gender', 'Gender', GRP_GENDER, root_id, 'Distribution over gender', KEYS_GENDER, gene_data.gender, ref.gender, SEQ_BLAST_SCALE );
                     data_nodes = addNodeCategoryFromKeys( true, data_nodes, 'bmi', 'BMI', GRP_BMI, root_id, 'Distribution over BMI', KEYS_BMI, gene_data.bmi, ref.bmi, SEQ_BLAST_SCALE );
@@ -563,17 +563,17 @@
     // This is used for creating a category of nodes from an array of objects with a count property.
     // Currently, its used to create the "cohort" category.
 
-    function addNodeCategory(has_id, node_array, category, cat_label, group, edge_source, edge_label, metadata_array, scale ){
+    function addNodeCategory(has_id, node_array, category, cat_label, group, edge_source, edge_label, metadata_array, scale, extra_link ){
         var cat_node_size = resolveCategoryNodeSize(scale);
         var node_unit = getUnitScale(metadata_array);
 
         var edge_source = edge_source; // local scope
 
-        // adjustment for showing cohort distribution: adds an node which
-        // creates a better distributed graph by lowering the level of all the
-        // descendent nodes.
-        if (group == GRP_PPL) {
-            node_array.push( createNode( 'n_'+category+'link', cat_node_size, cat_node_size, WHITE, ' ', WHITE ));
+        // adjustment used for showing cohort distribution in graphs: adds a node which
+        // which lowers the level of all the descendent nodes. Makes the graph easier to
+        // understand when edges link back to equal levels.
+        if (extra_link) {
+            node_array.push( createNode( 'n_'+category+'link', cat_node_size, cat_node_size, WHITE, ' - ', group ));
             node_array.push( createEdge( 'e_'+category+"link", edge_source, 'n_'+category+'link', ' ', EDGE_WIDTH,  CAT_NODE ) );
             edge_source = 'n_'+category+'link';
         }
@@ -625,7 +625,7 @@
             var name = category + '_' + current_key;
             var label;
 
-            is_weighted ? label = 'Score ' : label = 'Count';
+            is_weighted ? label = 'Score: ' : label = 'Count: ';
 
             node_array.push( createNode( 'n_' + name, node_size, node_size, group, current_key ) );
             node_array.push( createEdge( 'e_' + name, 'n_' + category, 'n_' + name, label + score, EDGE_WIDTH, group ) );
